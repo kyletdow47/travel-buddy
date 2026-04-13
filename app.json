@@ -9,8 +9,9 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.travelbuddy.app"
+      "supportsTablet": false,
+      "bundleIdentifier": "com.travelbuddy.app",
+      "buildNumber": "1"
     },
     "android": {
       "adaptiveIcon": {
