@@ -15,8 +15,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors, Typography, Spacing, Radius } from '../../src/constants/theme';
 import { useTrips } from '../../src/hooks/useTrips';
 import { useStops } from '../../src/hooks/useStops';
-import { reorderStops, updateStopStatus, deleteStop } from '../../src/services/stopsService';
+import { createStop, updateStop, reorderStops, updateStopStatus, deleteStop } from '../../src/services/stopsService';
 import StopRow from '../../src/components/StopRow';
+import { AddStopModal } from '../../src/components/AddStopModal';
+import { EditStopModal } from '../../src/components/EditStopModal';
 import type { Trip, Stop } from '../../src/types';
 
 function getTripProgress(trip: Trip): { elapsed: number; total: number; fraction: number } {
@@ -44,9 +46,9 @@ type StatusKey = 'upcoming' | 'current' | 'done';
 export default function PlanScreen() {
   const { trips, loading: tripsLoading } = useTrips();
   const [selectedTripId, setSelectedTripId] = useState<string | null>(null);
-  const { stops, loading: stopsLoading, refetch: refetchStops } = useStops(
-    selectedTripId
-  );
+  const { stops, loading: stopsLoading, refetch: refetchStops } = useStops(selectedTripId);
+  const [addModalVisible, setAddModalVisible] = useState(false);
+  const [editingStop, setEditingStop] = useState<Stop | null>(null);
 
   const selectedTrip = trips.find((t) => t.id === selectedTripId) ?? null;
 
@@ -95,6 +97,24 @@ export default function PlanScreen() {
     [refetchStops]
   );
 
+  const handleAddStop = useCallback(
+    async (stopInsert: Parameters<typeof createStop>[0]) => {
+      await createStop(stopInsert);
+      await refetchStops();
+      setAddModalVisible(false);
+    },
+    [refetchStops]
+  );
+
+  const handleEditStop = useCallback(
+    async (id: string, updates: Parameters<typeof updateStop>[1]) => {
+      await updateStop(id, updates);
+      await refetchStops();
+      setEditingStop(null);
+    },
+    [refetchStops]
+  );
+
   const renderItem = useCallback(
     ({ item, drag }: RenderItemParams<Stop>) => (
       <StopRow
@@ -102,6 +122,7 @@ export default function PlanScreen() {
         drag={drag}
         onStatusChange={handleStatusChange}
         onDelete={handleDeleteStop}
+        onEdit={setEditingStop}
       />
     ),
     [handleStatusChange, handleDeleteStop]
@@ -130,6 +151,10 @@ export default function PlanScreen() {
   }
 
   const progress = selectedTrip ? getTripProgress(selectedTrip) : null;
+
+  const maxSortOrder = stops.length > 0
+    ? Math.max(...stops.map((s) => s.sort_order ?? 0))
+    : -1;
 
   return (
     <GestureHandlerRootView style={styles.root}>
@@ -219,7 +244,34 @@ export default function PlanScreen() {
             contentContainerStyle={styles.listContent}
           />
         )}
+        {/* FAB */}
+        {selectedTripId ? (
+          <TouchableOpacity
+            style={styles.fab}
+            onPress={() => setAddModalVisible(true)}
+            activeOpacity={0.85}
+          >
+            <Ionicons name="add" size={28} color="#FFFFFF" />
+          </TouchableOpacity>
+        ) : null}
       </View>
+
+      {/* Modals */}
+      {selectedTripId ? (
+        <AddStopModal
+          visible={addModalVisible}
+          tripId={selectedTripId}
+          currentMaxSortOrder={maxSortOrder}
+          onClose={() => setAddModalVisible(false)}
+          onSave={handleAddStop}
+        />
+      ) : null}
+      <EditStopModal
+        visible={editingStop !== null}
+        stop={editingStop}
+        onClose={() => setEditingStop(null)}
+        onSave={handleEditStop}
+      />
     </GestureHandlerRootView>
   );
 }
@@ -312,6 +364,22 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   listContent: {
-    paddingBottom: Spacing.xl,
+    paddingBottom: 96,
+  },
+  fab: {
+    position: 'absolute',
+    bottom: 24,
+    right: 24,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: Colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
 });
