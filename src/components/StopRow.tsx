@@ -8,7 +8,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { Stop } from '../types';
-import { Colors, Typography, Spacing, Radius } from '../constants/theme';
+import { Colors, Typography, Spacing } from '../constants/theme';
+import { CategoryIcon } from './CategoryIcon';
 
 type StopStatus = 'upcoming' | 'current' | 'done';
 
@@ -18,10 +19,10 @@ const STATUS_CYCLE: Record<StopStatus, StopStatus> = {
   done: 'upcoming',
 };
 
-const STATUS_COLORS: Record<StopStatus, string> = {
-  upcoming: Colors.textSecondary,
-  current: Colors.primary,
-  done: Colors.success,
+const STATUS_STYLES: Record<StopStatus, { bg: string; text: string }> = {
+  upcoming: { bg: Colors.backgroundSecondary, text: Colors.textSecondary },
+  current:  { bg: Colors.primary,             text: '#FFFFFF' },
+  done:     { bg: Colors.success,             text: '#FFFFFF' },
 };
 
 const STATUS_LABELS: Record<StopStatus, string> = {
@@ -29,24 +30,6 @@ const STATUS_LABELS: Record<StopStatus, string> = {
   current: 'Current',
   done: 'Done',
 };
-
-const CATEGORY_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
-  food: 'restaurant-outline',
-  hotel: 'bed-outline',
-  transport: 'car-outline',
-  activity: 'ticket-outline',
-  shopping: 'bag-outline',
-  nature: 'leaf-outline',
-  culture: 'library-outline',
-  nightlife: 'moon-outline',
-};
-
-const DEFAULT_CATEGORY_ICON: keyof typeof Ionicons.glyphMap = 'location-outline';
-
-function getCategoryIcon(category: string | null): keyof typeof Ionicons.glyphMap {
-  if (!category) return DEFAULT_CATEGORY_ICON;
-  return CATEGORY_ICONS[category.toLowerCase()] ?? DEFAULT_CATEGORY_ICON;
-}
 
 interface StopRowProps {
   stop: Stop;
@@ -73,7 +56,7 @@ export default function StopRow({
   drag,
 }: StopRowProps) {
   const status = (stop.status as StopStatus) ?? 'upcoming';
-  const statusColor = STATUS_COLORS[status];
+  const statusStyle = STATUS_STYLES[status];
   const statusLabel = STATUS_LABELS[status];
 
   const handleStatusPress = () => {
@@ -120,13 +103,7 @@ export default function StopRow({
         >
           <Ionicons name="menu-outline" size={20} color={Colors.textSecondary} />
         </TouchableOpacity>
-        <View style={[styles.categoryIconContainer, { borderColor: statusColor }]}>
-          <Ionicons
-            name={getCategoryIcon(stop.category)}
-            size={18}
-            color={statusColor}
-          />
-        </View>
+        <CategoryIcon category={stop.category} size={18} />
       </View>
 
       <View style={styles.centerSection}>
@@ -149,12 +126,11 @@ export default function StopRow({
       </View>
 
       <TouchableOpacity
-        style={[styles.statusChip, { backgroundColor: `${statusColor}18` }]}
+        style={[styles.statusChip, { backgroundColor: statusStyle.bg }]}
         onPress={handleStatusPress}
         hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
       >
-        <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
-        <Text style={[styles.statusText, { color: statusColor }]}>
+        <Text style={[styles.statusText, { color: statusStyle.text }]}>
           {statusLabel}
         </Text>
       </TouchableOpacity>
@@ -179,15 +155,6 @@ const styles = StyleSheet.create({
   },
   dragHandle: {
     padding: Spacing.xs,
-  },
-  categoryIconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: Radius.sm,
-    borderWidth: 1.5,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.backgroundSecondary,
   },
   centerSection: {
     flex: 1,
@@ -220,17 +187,9 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   statusChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
     paddingHorizontal: Spacing.sm + 2,
     paddingVertical: Spacing.xs + 1,
-    borderRadius: Radius.full,
-    gap: 4,
-  },
-  statusDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
+    borderRadius: 12,
   },
   statusText: {
     fontSize: 12,
