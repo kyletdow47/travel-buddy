@@ -8,15 +8,28 @@
     "scheme": "travel-buddy",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.travelbuddy.app"
+      "supportsTablet": false,
+      "bundleIdentifier": "com.travelbuddy.app",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Travel Buddy uses the camera to let you snap photos of receipts so they can be saved to your trip.",
+        "NSPhotoLibraryUsageDescription": "Travel Buddy accesses your photo library so you can attach existing receipt images and trip photos.",
+        "NSPhotoLibraryAddUsageDescription": "Travel Buddy saves generated trip photos and receipts back to your photo library when you choose to export them.",
+        "NSLocationWhenInUseUsageDescription": "Travel Buddy uses your location to center the map on you and show nearby stops on your itinerary."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      }
+        "backgroundColor": "#E86540"
+      },
+      "package": "com.travelbuddy.app"
     },
     "web": {
       "bundler": "metro",
