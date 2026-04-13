@@ -82,6 +82,7 @@ export default function TabLayout() {
         name="assistant"
         options={{
           title: 'Assistant',
+          headerShown: false,
           tabBarIcon: ({ color, size }) => <TabIcon name="chatbubbles" color={color} size={size} />,
         }}
       />
