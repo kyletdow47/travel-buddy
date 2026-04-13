@@ -36,7 +36,6 @@ interface StopRowProps {
   onEdit?: (stop: Stop) => void;
   onDelete?: (stop: Stop) => void;
   onStatusChange?: (stop: Stop, newStatus: StopStatus) => void;
-  drag?: () => void;
 }
 
 function formatDate(dateStr: string | null): string | null {
@@ -53,7 +52,6 @@ export default function StopRow({
   onEdit,
   onDelete,
   onStatusChange,
-  drag,
 }: StopRowProps) {
   const status = (stop.status as StopStatus) ?? 'upcoming';
   const statusStyle = STATUS_STYLES[status];
@@ -96,13 +94,6 @@ export default function StopRow({
       activeOpacity={0.7}
     >
       <View style={styles.leftSection}>
-        <TouchableOpacity
-          onPressIn={drag}
-          style={styles.dragHandle}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-        >
-          <Ionicons name="menu-outline" size={20} color={Colors.textSecondary} />
-        </TouchableOpacity>
         <CategoryIcon category={stop.category} size={18} />
       </View>
 
@@ -152,9 +143,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.sm,
-  },
-  dragHandle: {
-    padding: Spacing.xs,
   },
   centerSection: {
     flex: 1,
