@@ -2,7 +2,7 @@ import { Tabs } from 'expo-router';
 import { type ComponentProps } from 'react';
 import { Platform } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { Colors } from '../../src/constants/theme';
+import { Colors, Shadows } from '../../src/constants/theme';
 
 type IoniconsName = ComponentProps<typeof Ionicons>['name'];
 
@@ -15,20 +15,20 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: '#9CA3AF',
+        tabBarInactiveTintColor: Colors.textTertiary,
         tabBarStyle: {
-          backgroundColor: Colors.background,
+          backgroundColor: Colors.surface,
           borderTopColor: Colors.border,
           borderTopWidth: 0.5,
           ...Platform.select({
             ios: {
-              shadowColor: '#000',
-              shadowOpacity: 0.05,
-              shadowRadius: 4,
-              shadowOffset: { width: 0, height: -2 },
+              shadowColor: Shadows.sm.shadowColor,
+              shadowOpacity: Shadows.sm.shadowOpacity,
+              shadowRadius: Shadows.sm.shadowRadius,
+              shadowOffset: { width: 0, height: -1 },
             },
             android: {
-              elevation: 4,
+              elevation: Shadows.sm.elevation,
             },
           }),
         },
@@ -37,16 +37,16 @@ export default function TabLayout() {
           fontWeight: '500',
         },
         headerStyle: {
-          backgroundColor: Colors.background,
+          backgroundColor: Colors.surface,
           ...Platform.select({
             ios: {
-              shadowColor: '#000',
-              shadowOpacity: 0.05,
-              shadowRadius: 4,
-              shadowOffset: { width: 0, height: 2 },
+              shadowColor: Shadows.sm.shadowColor,
+              shadowOpacity: Shadows.sm.shadowOpacity,
+              shadowRadius: Shadows.sm.shadowRadius,
+              shadowOffset: Shadows.sm.shadowOffset,
             },
             android: {
-              elevation: 2,
+              elevation: Shadows.sm.elevation,
             },
           }),
         },
