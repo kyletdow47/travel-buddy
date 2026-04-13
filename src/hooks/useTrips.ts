@@ -12,6 +12,7 @@ interface UseTripsReturn {
   loading: boolean;
   error: string | null;
   refresh: () => Promise<void>;
+  refetch: () => Promise<void>;
   addTrip: (trip: TripInsert) => Promise<Trip>;
   editTrip: (id: string, updates: Partial<TripInsert>) => Promise<Trip>;
   removeTrip: (id: string) => Promise<void>;
@@ -64,5 +65,5 @@ export function useTrips(): UseTripsReturn {
     setTrips((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
-  return { trips, loading, error, refresh, addTrip, editTrip, removeTrip };
+  return { trips, loading, error, refresh, refetch: refresh, addTrip, editTrip, removeTrip };
 }

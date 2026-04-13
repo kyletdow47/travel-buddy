@@ -17,6 +17,7 @@ export function useStops(tripId: string | null): UseStopsResult {
   const refetch = useCallback(async () => {
     if (!tripId) {
       setStops([]);
+      setLoading(false);
       return;
     }
 

@@ -50,9 +50,9 @@ function getCategoryIcon(category: string | null): keyof typeof Ionicons.glyphMa
 
 interface StopRowProps {
   stop: Stop;
-  onEdit: (stop: Stop) => void;
-  onDelete: (stop: Stop) => void;
-  onStatusChange: (stop: Stop, newStatus: StopStatus) => void;
+  onEdit?: (stop: Stop) => void;
+  onDelete?: (stop: Stop) => void;
+  onStatusChange?: (stop: Stop, newStatus: StopStatus) => void;
   drag?: () => void;
 }
 
@@ -65,7 +65,7 @@ function formatDate(dateStr: string | null): string | null {
   });
 }
 
-export function StopRow({
+export default function StopRow({
   stop,
   onEdit,
   onDelete,
@@ -78,12 +78,12 @@ export function StopRow({
 
   const handleStatusPress = () => {
     const nextStatus = STATUS_CYCLE[status];
-    onStatusChange(stop, nextStatus);
+    onStatusChange?.(stop, nextStatus);
   };
 
   const handleLongPress = () => {
     Alert.alert(stop.name, undefined, [
-      { text: 'Edit', onPress: () => onEdit(stop) },
+      { text: 'Edit', onPress: () => onEdit?.(stop) },
       {
         text: 'Delete',
         style: 'destructive',
@@ -96,7 +96,7 @@ export function StopRow({
               {
                 text: 'Delete',
                 style: 'destructive',
-                onPress: () => onDelete(stop),
+                onPress: () => onDelete?.(stop),
               },
             ]
           );
