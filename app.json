@@ -6,24 +6,36 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "travel-buddy",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "bundleIdentifier": "com.travelbuddy.app",
+      "buildNumber": "1",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Travel Buddy uses your location to show your position on the trip map.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "Travel Buddy uses your location to show your position on the trip map."
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Travel Buddy uses your location to show your position on the trip map.",
+        "NSCameraUsageDescription": "Travel Buddy uses your camera to capture receipt photos.",
+        "NSPhotoLibraryUsageDescription": "Travel Buddy accesses your photos to attach receipt images."
       }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#E86540"
       },
+      "package": "com.travelbuddy.app",
+      "versionCode": 1,
       "permissions": [
         "android.permission.ACCESS_COARSE_LOCATION",
-        "android.permission.ACCESS_FINE_LOCATION"
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE"
       ]
     },
     "web": {
@@ -45,6 +57,11 @@
           "cameraPermission": "Allow Travel Buddy to take photos of receipts."
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "your-eas-project-id"
+      }
+    }
   }
 }
