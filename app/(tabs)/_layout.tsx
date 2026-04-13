@@ -1,7 +1,8 @@
 import { Tabs } from 'expo-router';
 import { type ComponentProps } from 'react';
-import { Platform } from 'react-native';
+import { Platform, useColorScheme } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import * as Haptics from 'expo-haptics';
 import { Colors } from '../../src/constants/theme';
 
 type IoniconsName = ComponentProps<typeof Ionicons>['name'];
@@ -11,14 +12,21 @@ function TabIcon({ name, color, size }: { name: IoniconsName; color: string; siz
 }
 
 export default function TabLayout() {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+
+  const bgColor = isDark ? Colors.dark.background : Colors.background;
+  const borderColor = isDark ? Colors.dark.border : Colors.border;
+  const textColor = isDark ? Colors.dark.text : Colors.text;
+
   return (
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: '#9CA3AF',
+        tabBarInactiveTintColor: isDark ? Colors.dark.textSecondary : '#9CA3AF',
         tabBarStyle: {
-          backgroundColor: Colors.background,
-          borderTopColor: Colors.border,
+          backgroundColor: bgColor,
+          borderTopColor: borderColor,
           borderTopWidth: 0.5,
           ...Platform.select({
             ios: {
@@ -37,7 +45,7 @@ export default function TabLayout() {
           fontWeight: '500',
         },
         headerStyle: {
-          backgroundColor: Colors.background,
+          backgroundColor: bgColor,
           ...Platform.select({
             ios: {
               shadowColor: '#000',
@@ -53,7 +61,12 @@ export default function TabLayout() {
         headerTitleStyle: {
           fontSize: 17,
           fontWeight: '600',
-          color: Colors.text,
+          color: textColor,
+        },
+      }}
+      screenListeners={{
+        tabPress: () => {
+          Haptics.selectionAsync();
         },
       }}
     >

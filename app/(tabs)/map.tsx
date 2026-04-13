@@ -1,24 +1,24 @@
-import { View, Text, StyleSheet } from 'react-native';
-import { Colors, Typography } from '../../src/constants/theme';
+import { View, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useDarkColors } from '../../src/hooks/useDarkColors';
+import { EmptyState } from '../../src/components/EmptyState';
 
 export default function MapScreen() {
+  const colors = useDarkColors();
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Map</Text>
-    </View>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+      <EmptyState
+        icon="map"
+        title="No locations on map"
+        subtitle="Add stops with coordinates to see them here"
+      />
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.background,
-  },
-  title: {
-    fontSize: Typography.h1.fontSize,
-    fontWeight: Typography.h1.fontWeight,
-    color: Colors.text,
   },
 });
