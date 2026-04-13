@@ -43,6 +43,8 @@ export default function HomeScreen() {
           name: loc.name,
           category: loc.category,
           sort_order: loc.sort_order,
+          lat: loc.lat ?? null,
+          lng: loc.lng ?? null,
           status: 'upcoming',
         });
       }
