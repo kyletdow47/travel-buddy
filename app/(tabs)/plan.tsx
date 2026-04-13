@@ -4,18 +4,15 @@ import {
   Text,
   StyleSheet,
   ScrollView,
+  FlatList,
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
-import DraggableFlatList, {
-  type RenderItemParams,
-} from 'react-native-draggable-flatlist';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Typography, Spacing, Radius } from '../../src/constants/theme';
 import { useTrips } from '../../src/hooks/useTrips';
 import { useStops } from '../../src/hooks/useStops';
-import { createStop, updateStop, reorderStops, updateStopStatus, deleteStop } from '../../src/services/stopsService';
+import { createStop, updateStop, updateStopStatus, deleteStop } from '../../src/services/stopsService';
 import StopRow from '../../src/components/StopRow';
 import { AddStopModal } from '../../src/components/AddStopModal';
 import { EditStopModal } from '../../src/components/EditStopModal';
@@ -58,20 +55,6 @@ export default function PlanScreen() {
       setSelectedTripId(trips[0].id);
     }
   }, [trips, selectedTripId]);
-
-  const handleDragEnd = useCallback(
-    async ({ data }: { data: Stop[] }) => {
-      const orderedIds = data.map((s) => s.id);
-      try {
-        await reorderStops(orderedIds);
-        await refetchStops();
-      } catch {
-        // Refetch to restore original order on error
-        await refetchStops();
-      }
-    },
-    [refetchStops]
-  );
 
   const handleStatusChange = useCallback(
     async (stop: Stop, newStatus: StatusKey) => {
@@ -116,10 +99,9 @@ export default function PlanScreen() {
   );
 
   const renderItem = useCallback(
-    ({ item, drag }: RenderItemParams<Stop>) => (
+    ({ item }: { item: Stop }) => (
       <StopRow
         stop={item}
-        drag={drag}
         onStatusChange={handleStatusChange}
         onDelete={handleDeleteStop}
         onEdit={setEditingStop}
@@ -157,104 +139,91 @@ export default function PlanScreen() {
     : -1;
 
   return (
-    <GestureHandlerRootView style={styles.root}>
-      <View style={styles.container}>
-        {/* Trip Selector Chips */}
-        <View style={styles.chipSection}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.chipScroll}
-          >
-            {trips.map((trip) => {
-              const isSelected = trip.id === selectedTripId;
-              return (
-                <TouchableOpacity
-                  key={trip.id}
-                  style={[
-                    styles.chip,
-                    isSelected && styles.chipSelected,
-                  ]}
-                  onPress={() => setSelectedTripId(trip.id)}
-                  activeOpacity={0.7}
+    <View style={styles.container}>
+      {/* Trip Selector Chips */}
+      <View style={styles.chipSection}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.chipScroll}
+        >
+          {trips.map((trip) => {
+            const isSelected = trip.id === selectedTripId;
+            return (
+              <TouchableOpacity
+                key={trip.id}
+                style={[styles.chip, isSelected && styles.chipSelected]}
+                onPress={() => setSelectedTripId(trip.id)}
+                activeOpacity={0.7}
+              >
+                <Text
+                  style={[styles.chipText, isSelected && styles.chipTextSelected]}
+                  numberOfLines={1}
                 >
-                  <Text
-                    style={[
-                      styles.chipText,
-                      isSelected && styles.chipTextSelected,
-                    ]}
-                    numberOfLines={1}
-                  >
-                    {trip.name}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </ScrollView>
-        </View>
-
-        {/* Progress Bar */}
-        {selectedTrip && (
-          <View style={styles.progressSection}>
-            <Text style={styles.dateRange}>
-              {formatDateRange(selectedTrip.start_date, selectedTrip.end_date)}
-            </Text>
-            {progress && progress.total > 0 ? (
-              <>
-                <View style={styles.progressBar}>
-                  <View
-                    style={[
-                      styles.progressFill,
-                      { width: `${Math.round(progress.fraction * 100)}%` },
-                    ]}
-                  />
-                </View>
-                <Text style={styles.progressLabel}>
-                  Day {progress.elapsed} of {progress.total}
+                  {trip.name}
                 </Text>
-              </>
-            ) : null}
-          </View>
-        )}
-
-        {/* Stop List */}
-        {stopsLoading ? (
-          <View style={styles.centered}>
-            <ActivityIndicator size="small" color={Colors.primary} />
-          </View>
-        ) : stops.length === 0 ? (
-          <View style={styles.centered}>
-            <Ionicons
-              name="location-outline"
-              size={48}
-              color={Colors.textSecondary}
-            />
-            <Text style={styles.emptyTitle}>No stops yet</Text>
-            <Text style={styles.emptySubtitle}>
-              Tap + to add your first stop
-            </Text>
-          </View>
-        ) : (
-          <DraggableFlatList
-            data={stops}
-            keyExtractor={keyExtractor}
-            renderItem={renderItem}
-            onDragEnd={handleDragEnd}
-            containerStyle={styles.listContainer}
-            contentContainerStyle={styles.listContent}
-          />
-        )}
-        {/* FAB */}
-        {selectedTripId ? (
-          <TouchableOpacity
-            style={styles.fab}
-            onPress={() => setAddModalVisible(true)}
-            activeOpacity={0.85}
-          >
-            <Ionicons name="add" size={28} color="#FFFFFF" />
-          </TouchableOpacity>
-        ) : null}
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
       </View>
+
+      {/* Progress Bar */}
+      {selectedTrip && (
+        <View style={styles.progressSection}>
+          <Text style={styles.dateRange}>
+            {formatDateRange(selectedTrip.start_date, selectedTrip.end_date)}
+          </Text>
+          {progress && progress.total > 0 ? (
+            <>
+              <View style={styles.progressBar}>
+                <View
+                  style={[
+                    styles.progressFill,
+                    { width: `${Math.round(progress.fraction * 100)}%` },
+                  ]}
+                />
+              </View>
+              <Text style={styles.progressLabel}>
+                Day {progress.elapsed} of {progress.total}
+              </Text>
+            </>
+          ) : null}
+        </View>
+      )}
+
+      {/* Stop List */}
+      {stopsLoading ? (
+        <View style={styles.centered}>
+          <ActivityIndicator size="small" color={Colors.primary} />
+        </View>
+      ) : stops.length === 0 ? (
+        <View style={styles.centered}>
+          <Ionicons name="location-outline" size={48} color={Colors.textSecondary} />
+          <Text style={styles.emptyTitle}>No stops yet</Text>
+          <Text style={styles.emptySubtitle}>Tap + to add your first stop</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={stops}
+          keyExtractor={keyExtractor}
+          renderItem={renderItem}
+          style={styles.listContainer}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
+
+      {/* FAB */}
+      {selectedTripId ? (
+        <TouchableOpacity
+          style={styles.fab}
+          onPress={() => setAddModalVisible(true)}
+          activeOpacity={0.85}
+        >
+          <Ionicons name="add" size={28} color="#FFFFFF" />
+        </TouchableOpacity>
+      ) : null}
 
       {/* Modals */}
       {selectedTripId ? (
@@ -272,14 +241,11 @@ export default function PlanScreen() {
         onClose={() => setEditingStop(null)}
         onSave={handleEditStop}
       />
-    </GestureHandlerRootView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-  },
   container: {
     flex: 1,
     backgroundColor: Colors.background,
