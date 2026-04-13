@@ -6,6 +6,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { Colors } from '../constants/theme';
 
 interface Props {
@@ -19,6 +20,7 @@ export function MessageInput({ onSend, isLoading }: Props) {
   const handleSend = () => {
     const trimmed = text.trim();
     if (!trimmed || isLoading) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onSend(trimmed);
     setText('');
   };
