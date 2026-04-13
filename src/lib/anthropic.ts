@@ -1,9 +1,16 @@
-const anthropicApiKey = process.env.EXPO_PUBLIC_ANTHROPIC_API_KEY;
+import Anthropic from '@anthropic-ai/sdk';
 
-if (!anthropicApiKey) {
+const apiKey = process.env.EXPO_PUBLIC_ANTHROPIC_API_KEY;
+
+if (!apiKey) {
   throw new Error(
     'Missing EXPO_PUBLIC_ANTHROPIC_API_KEY. Add it to your .env file.'
   );
 }
 
-export const ANTHROPIC_API_KEY = anthropicApiKey;
+// Note: Calling Anthropic directly from the client exposes the API key.
+// For a personal app this is acceptable. For production, proxy through a server route.
+export const anthropic = new Anthropic({
+  apiKey,
+  dangerouslyAllowBrowser: true,
+});
