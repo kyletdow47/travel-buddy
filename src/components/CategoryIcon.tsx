@@ -18,7 +18,7 @@ interface CategoryIconProps {
 }
 
 export function CategoryIcon({ category, size = 18 }: CategoryIconProps) {
-  const { name, color } = (category && ICONS[category.toLowerCase()]) ?? DEFAULT;
+  const { name, color } = (category ? ICONS[category.toLowerCase()] : null) ?? DEFAULT;
   return (
     <View style={[styles.circle, { borderColor: color, width: size * 2, height: size * 2, borderRadius: size }]}>
       <Ionicons name={name} size={size} color={color} />
