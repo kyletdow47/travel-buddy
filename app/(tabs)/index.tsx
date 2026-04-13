@@ -13,8 +13,9 @@ import { Colors, Typography, Spacing, Radius } from '../../src/constants/theme';
 import { useTrips } from '../../src/hooks/useTrips';
 import { TripCard } from '../../src/components/TripCard';
 import { ActiveTripBanner } from '../../src/components/ActiveTripBanner';
-import { CreateTripModal } from '../../src/components/CreateTripModal';
+import { CreateTripModal, type LocationStop } from '../../src/components/CreateTripModal';
 import { EditTripModal } from '../../src/components/EditTripModal';
+import { createStop } from '../../src/services/stopsService';
 import type { Trip, TripInsert } from '../../src/types';
 
 export default function HomeScreen() {
@@ -33,8 +34,18 @@ export default function HomeScreen() {
   }, [refresh]);
 
   const handleCreateSave = useCallback(
-    async (trip: TripInsert) => {
-      await addTrip(trip);
+    async (trip: TripInsert, locations: LocationStop[]) => {
+      const created = await addTrip(trip);
+      // Create stops for start point, waypoints, and end point
+      for (const loc of locations) {
+        await createStop({
+          trip_id: created.id,
+          name: loc.name,
+          category: loc.category,
+          sort_order: loc.sort_order,
+          status: 'upcoming',
+        });
+      }
       setCreateModalVisible(false);
     },
     [addTrip]
