@@ -37,6 +37,13 @@
         {
           "locationWhenInUsePermission": "Travel Buddy uses your location to show your position on the trip map."
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Travel Buddy to access your photos to attach receipt images.",
+          "cameraPermission": "Allow Travel Buddy to take photos of receipts."
+        }
       ]
     ]
   }

@@ -3,6 +3,16 @@ import { decode } from 'base64-arraybuffer';
 import { supabase } from '../lib/supabase';
 import type { Receipt, ReceiptInsert } from '../types';
 
+export async function getReceipt(id: string): Promise<Receipt> {
+  const { data, error } = await supabase
+    .from('receipts')
+    .select('*')
+    .eq('id', id)
+    .single();
+  if (error) throw error;
+  return data;
+}
+
 export async function getReceipts(tripId: string): Promise<Receipt[]> {
   const { data, error } = await supabase
     .from('receipts')
