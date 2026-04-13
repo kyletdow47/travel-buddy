@@ -10,6 +10,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import type { Stop, Trip } from '../../src/types';
 import { StopRow } from '../../src/components/StopRow';
 import { Colors, Typography, Spacing, Radius, Shadows } from '../../src/constants/theme';
+import { haptics } from '../../src/lib/haptics';
 
 // Mock data placeholder — swap for useTrips/useStops hooks when wired.
 const MOCK_TRIPS: Trip[] = [];
@@ -76,7 +77,10 @@ export default function PlanScreen() {
               key={trip.id}
               activeOpacity={0.8}
               style={[styles.selectorChip, active && styles.selectorChipActive]}
-              onPress={() => setActiveTripId(trip.id)}
+              onPress={() => {
+                haptics.selection();
+                setActiveTripId(trip.id);
+              }}
             >
               <Text
                 style={[

@@ -14,6 +14,7 @@ import type { Trip, Stop } from '../../src/types';
 import { MapPhotoMarker } from '../../src/components/MapPhotoMarker';
 import { StopDetailSheet } from '../../src/components/StopDetailSheet';
 import { Colors, Typography, Spacing, Radius, Shadows } from '../../src/constants/theme';
+import { haptics } from '../../src/lib/haptics';
 
 // Placeholder data — swap for useTrips/useStops hooks when wired.
 const MOCK_TRIPS: Trip[] = [];
@@ -41,11 +42,11 @@ export default function MapScreen() {
 
   const fabScale = useMemo(() => new Animated.Value(1), []);
   const onFabPress = () => {
+    haptics.light();
     Animated.sequence([
       Animated.timing(fabScale, { toValue: 0.92, duration: 80, useNativeDriver: true }),
       Animated.spring(fabScale, { toValue: 1, useNativeDriver: true, damping: 10 }),
     ]).start();
-    // Haptics: wire up with expo-haptics in Task 9 (Micro-interactions)
   };
 
   return (
@@ -94,7 +95,10 @@ export default function MapScreen() {
                     key={trip.id}
                     activeOpacity={0.85}
                     style={[styles.chip, active && styles.chipActive]}
-                    onPress={() => setActiveTripId(trip.id)}
+                    onPress={() => {
+                      haptics.selection();
+                      setActiveTripId(trip.id);
+                    }}
                   >
                     <Text
                       style={[styles.chipText, active && styles.chipTextActive]}

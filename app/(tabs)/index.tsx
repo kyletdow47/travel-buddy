@@ -13,6 +13,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Colors, Typography, Spacing, Radius, Shadows } from '../../src/constants/theme';
+import { haptics } from '../../src/lib/haptics';
+import { AnimatedEnter } from '../../src/components/AnimatedEnter';
 
 // Static destination photos for the inspiration strip
 const DESTINATION_PHOTOS = [
@@ -80,7 +82,10 @@ export default function HomeScreen() {
         <TouchableOpacity
           style={styles.searchBar}
           activeOpacity={0.8}
-          onPress={() => router.push('/assistant')}
+          onPress={() => {
+            haptics.light();
+            router.push('/assistant');
+          }}
         >
           <Animated.View style={[styles.orb, { opacity: orbAnim }]} />
           <Text style={styles.searchPlaceholder}>Ask me anything...</Text>
@@ -106,7 +111,10 @@ export default function HomeScreen() {
                   activeFilter === option && styles.filterChipActive,
                 ]}
                 activeOpacity={0.7}
-                onPress={() => setActiveFilter(option)}
+                onPress={() => {
+                  haptics.selection();
+                  setActiveFilter(option);
+                }}
               >
                 <Text
                   style={[
@@ -122,7 +130,7 @@ export default function HomeScreen() {
         </View>
 
         {/* Empty State */}
-        <View style={styles.emptyState}>
+        <AnimatedEnter style={styles.emptyState}>
           <View style={styles.emptyIcon}>
             <Ionicons name="airplane-outline" size={48} color={Colors.textTertiary} />
           </View>
@@ -130,11 +138,15 @@ export default function HomeScreen() {
           <Text style={styles.emptySubtitle}>
             Your adventures will show up here once you create your first trip.
           </Text>
-          <TouchableOpacity style={styles.ctaButton} activeOpacity={0.8}>
+          <TouchableOpacity
+            style={styles.ctaButton}
+            activeOpacity={0.8}
+            onPress={() => haptics.medium()}
+          >
             <Ionicons name="add" size={20} color={Colors.surface} />
             <Text style={styles.ctaButtonText}>Create your first trip</Text>
           </TouchableOpacity>
-        </View>
+        </AnimatedEnter>
       </ScrollView>
     </SafeAreaView>
   );

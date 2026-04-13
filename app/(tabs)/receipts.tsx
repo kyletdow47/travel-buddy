@@ -16,6 +16,7 @@ import {
   normalizeReceiptCategory,
 } from '../../src/components/ReceiptRow';
 import { Colors, Typography, Spacing, Radius, Shadows } from '../../src/constants/theme';
+import { haptics } from '../../src/lib/haptics';
 
 const MOCK_TRIPS: Trip[] = [];
 const MOCK_RECEIPTS: Receipt[] = [];
@@ -121,7 +122,11 @@ export default function ReceiptsScreen() {
       />
 
       {/* FAB */}
-      <TouchableOpacity style={styles.fab} activeOpacity={0.85}>
+      <TouchableOpacity
+        style={styles.fab}
+        activeOpacity={0.85}
+        onPress={() => haptics.medium()}
+      >
         <Ionicons name="add" size={26} color={Colors.surface} />
       </TouchableOpacity>
     </SafeAreaView>
@@ -167,7 +172,10 @@ function Header({
                 key={trip.id}
                 activeOpacity={0.85}
                 style={[styles.selectorChip, active && styles.selectorChipActive]}
-                onPress={() => setActiveTripId(trip.id)}
+                onPress={() => {
+                  haptics.selection();
+                  setActiveTripId(trip.id);
+                }}
               >
                 <Text
                   style={[
@@ -276,7 +284,10 @@ function Header({
               key={filter}
               activeOpacity={0.85}
               style={[styles.filterChip, active && styles.filterChipActive]}
-              onPress={() => setActiveFilter(filter)}
+              onPress={() => {
+                haptics.selection();
+                setActiveFilter(filter);
+              }}
             >
               <Text
                 style={[

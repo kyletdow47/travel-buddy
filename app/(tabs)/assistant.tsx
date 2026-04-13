@@ -16,6 +16,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { AIOrb } from '../../src/components/AIOrb';
 import { Colors, Typography, Spacing, Radius, Shadows } from '../../src/constants/theme';
+import { haptics } from '../../src/lib/haptics';
 
 type Role = 'user' | 'assistant';
 
@@ -56,6 +57,7 @@ export default function AssistantScreen() {
   const handleSend = () => {
     const text = input.trim();
     if (!text) return;
+    haptics.light();
     const userMsg: Message = {
       id: `u-${Date.now()}`,
       role: 'user',
@@ -81,6 +83,7 @@ export default function AssistantScreen() {
   };
 
   const handleNewChat = () => {
+    haptics.medium();
     setMessages([]);
     setInput('');
     setIsThinking(false);
