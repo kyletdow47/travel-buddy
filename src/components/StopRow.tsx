@@ -2,160 +2,198 @@ import { memo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import type { Stop } from '../types';
-import { Colors, Typography, Spacing, Radius } from '../constants/theme';
+import { Colors, Typography, Spacing, Radius, Shadows } from '../constants/theme';
+import { CategoryGlyph, normalizeCategory, categoryColor } from './CategoryGlyph';
+import { FlightSegmentRow, type FlightSegment } from './FlightSegmentRow';
 
 type StopStatus = 'upcoming' | 'current' | 'done';
-type CategoryKey = 'hotel' | 'food' | 'gas' | 'activity' | 'other';
 
 type StopRowProps = {
   stop: Stop;
   index: number;
+  /** Whether to show the vertical timeline connector below this row. */
+  showConnector?: boolean;
   onPress?: () => void;
   onLongPress?: () => void;
   onStatusPress?: () => void;
 };
 
-const CATEGORY_META: Record<
-  CategoryKey,
-  { label: string; icon: keyof typeof Ionicons.glyphMap; color: string }
-> = {
-  hotel: { label: 'Hotel', icon: 'bed-outline', color: Colors.category.hotel },
-  food: { label: 'Food', icon: 'restaurant-outline', color: Colors.category.food },
-  gas: { label: 'Gas', icon: 'car-outline', color: Colors.category.gas },
-  activity: { label: 'Activity', icon: 'bicycle-outline', color: Colors.category.activity },
-  other: { label: 'Other', icon: 'ellipse-outline', color: Colors.category.other },
-};
-
-function normalizeCategory(raw: string | null | undefined): CategoryKey {
-  const value = (raw ?? '').toLowerCase();
-  if (value === 'hotel' || value === 'food' || value === 'gas' || value === 'activity') {
-    return value;
-  }
-  return 'other';
-}
-
 function statusMeta(status: StopStatus) {
   switch (status) {
     case 'current':
-      return { label: 'Now', icon: '▸', color: Colors.primary, bg: Colors.primaryLight };
+      return { label: 'Now', icon: 'radio-button-on' as const, color: Colors.primary, bg: Colors.primaryLight };
     case 'done':
-      return { label: 'Done', icon: '✓', color: Colors.textSecondary, bg: Colors.border };
-    case 'upcoming':
+      return { label: 'Done', icon: 'checkmark-circle' as const, color: Colors.textSecondary, bg: Colors.border };
     default:
-      return { label: 'Upcoming', icon: '⬡', color: Colors.info, bg: 'rgba(59,130,246,0.12)' };
+      return { label: 'Upcoming', icon: 'ellipse-outline' as const, color: Colors.info, bg: 'rgba(58,164,255,0.12)' };
   }
 }
 
-function StopRowBase({ stop, index, onPress, onLongPress, onStatusPress }: StopRowProps) {
+/**
+ * Parses stop notes / metadata for a flight stop into a FlightSegment shape.
+ * Keeps it minimal — if the stop name looks like "JFK → LAX" we parse that,
+ * otherwise we fall back to showing the stop name as the route.
+ */
+function parseFlightSegment(stop: Stop): FlightSegment {
+  const arrowMatch = stop.name.match(/^([A-Z]{3})\s*[→\->\s]+\s*([A-Z]{3})$/i);
+  if (arrowMatch) {
+    return { from: arrowMatch[1].toUpperCase(), to: arrowMatch[2].toUpperCase() };
+  }
+  // Generic flight stop: show departure city in FROM, destination in TO if available
+  const parts = (stop.location ?? stop.name).split(/[,→\-]/);
+  const from = parts[0]?.trim().substring(0, 3).toUpperCase() ?? '???';
+  const to = parts[1]?.trim().substring(0, 3).toUpperCase() ?? '???';
+  return { from, to, airline: stop.name };
+}
+
+function StopRowBase({
+  stop,
+  index,
+  showConnector = false,
+  onPress,
+  onLongPress,
+  onStatusPress,
+}: StopRowProps) {
   const status = (stop.status as StopStatus) ?? 'upcoming';
   const sMeta = statusMeta(status);
-  const category = normalizeCategory(stop.category);
-  const cMeta = CATEGORY_META[category];
+  const cat = normalizeCategory(stop.category);
+  const dotColor = categoryColor(stop.category);
+  const isFlight = cat === 'flight';
 
   return (
-    <TouchableOpacity
-      style={styles.row}
-      activeOpacity={0.85}
-      onPress={onPress}
-      onLongPress={onLongPress}
-    >
-      {/* Left category-colored accent line */}
-      <View style={[styles.accent, { backgroundColor: cMeta.color }]} />
-
-      {/* Stop number circle */}
-      <View style={styles.numberCircle}>
-        <Text style={styles.numberText}>{index + 1}</Text>
+    <View style={styles.wrapper}>
+      {/* Timeline column */}
+      <View style={styles.timelineCol}>
+        <CategoryGlyph category={cat} size={28} elevated />
+        {showConnector && <View style={[styles.connector, { backgroundColor: dotColor + '40' }]} />}
       </View>
 
-      {/* Main content */}
-      <View style={styles.content}>
-        <View style={styles.topRow}>
-          <View style={styles.iconWrap}>
-            <Ionicons name={cMeta.icon} size={16} color={cMeta.color} />
-          </View>
-          <Text style={styles.name} numberOfLines={1}>
-            {stop.name}
-          </Text>
-        </View>
+      {/* Card */}
+      <View style={styles.cardWrap}>
+        {isFlight ? (
+          /* ── Flight variant — show FlightSegmentRow ── */
+          <TouchableOpacity
+            activeOpacity={0.88}
+            onPress={onPress}
+            onLongPress={onLongPress}
+          >
+            <FlightSegmentRow segment={parseFlightSegment(stop)} />
+          </TouchableOpacity>
+        ) : (
+          /* ── Standard stop card ── */
+          <TouchableOpacity
+            style={styles.card}
+            activeOpacity={0.85}
+            onPress={onPress}
+            onLongPress={onLongPress}
+          >
+            <View style={styles.cardMain}>
+              <Text style={styles.name} numberOfLines={1}>
+                {stop.name}
+              </Text>
 
-        <View style={styles.metaRow}>
-          <Ionicons name="location-outline" size={12} color={Colors.textSecondary} />
-          <Text style={styles.metaText} numberOfLines={1}>
-            {stop.location ?? 'Location TBD'}
-          </Text>
-          <View style={[styles.categoryTag, { backgroundColor: `${cMeta.color}1A` }]}>
-            <Text style={[styles.categoryTagText, { color: cMeta.color }]}>{cMeta.label}</Text>
+              {(stop.location || stop.notes) ? (
+                <View style={styles.metaRow}>
+                  {stop.location ? (
+                    <>
+                      <Ionicons name="location-outline" size={12} color={Colors.textTertiary} />
+                      <Text style={styles.metaText} numberOfLines={1}>
+                        {stop.location}
+                      </Text>
+                    </>
+                  ) : null}
+                  {stop.notes ? (
+                    <Text style={styles.notesPreview} numberOfLines={1}>
+                      {stop.location ? '  ·  ' : ''}{stop.notes}
+                    </Text>
+                  ) : null}
+                </View>
+              ) : null}
+
+              {stop.planned_date ? (
+                <View style={styles.metaRow}>
+                  <Ionicons name="calendar-outline" size={12} color={Colors.textTertiary} />
+                  <Text style={styles.metaText}>
+                    {new Date(stop.planned_date).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                    })}
+                  </Text>
+                </View>
+              ) : null}
+            </View>
+
+            {/* Status chip */}
+            <TouchableOpacity
+              style={[styles.statusChip, { backgroundColor: sMeta.bg }]}
+              activeOpacity={0.7}
+              onPress={onStatusPress}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <Ionicons name={sMeta.icon} size={12} color={sMeta.color} />
+              <Text style={[styles.statusText, { color: sMeta.color }]}>
+                {sMeta.label}
+              </Text>
+            </TouchableOpacity>
+          </TouchableOpacity>
+        )}
+
+        {/* Stop index badge (bottom-right corner for non-flight) */}
+        {!isFlight && (
+          <View style={styles.indexBadge}>
+            <Text style={styles.indexText}>{index + 1}</Text>
           </View>
-        </View>
+        )}
       </View>
-
-      {/* Status chip */}
-      <TouchableOpacity
-        style={[styles.statusChip, { backgroundColor: sMeta.bg }]}
-        activeOpacity={0.7}
-        onPress={onStatusPress}
-        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-      >
-        <Text style={[styles.statusChipText, { color: sMeta.color }]}>
-          {sMeta.icon} {sMeta.label}
-        </Text>
-      </TouchableOpacity>
-    </TouchableOpacity>
+    </View>
   );
 }
 
 export const StopRow = memo(StopRowBase);
 
 const styles = StyleSheet.create({
-  row: {
+  wrapper: {
+    flexDirection: 'row',
+    marginBottom: Spacing.md,
+    alignItems: 'flex-start',
+  },
+
+  // ── Timeline column
+  timelineCol: {
+    width: 36,
+    alignItems: 'center',
+    paddingTop: 2,
+    marginRight: Spacing.sm,
+  },
+  connector: {
+    width: 2,
+    flex: 1,
+    minHeight: 24,
+    borderRadius: 1,
+    marginTop: Spacing.xs,
+  },
+
+  // ── Card area
+  cardWrap: {
+    flex: 1,
+    position: 'relative',
+  },
+  card: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.surface,
-    borderRadius: Radius.md,
+    borderRadius: Radius.lg,
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.md,
-    marginBottom: Spacing.sm,
-    borderWidth: 1,
+    borderWidth: StyleSheet.hairlineWidth,
     borderColor: Colors.border,
-    overflow: 'hidden',
+    ...Shadows.sm,
   },
-  accent: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    bottom: 0,
-    width: 3,
-  },
-  numberCircle: {
-    width: 24,
-    height: 24,
-    borderRadius: Radius.full,
-    backgroundColor: Colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: Spacing.sm,
-  },
-  numberText: {
-    ...Typography.micro,
-    color: Colors.surface,
-    fontWeight: '700',
-  },
-  content: {
+  cardMain: {
     flex: 1,
-  },
-  topRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.xs,
-  },
-  iconWrap: {
-    width: 20,
-    height: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
+    gap: 3,
   },
   name: {
-    flex: 1,
     ...Typography.bodyMed,
     fontWeight: '700',
     color: Colors.text,
@@ -163,34 +201,52 @@ const styles = StyleSheet.create({
   metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.xs,
-    marginTop: 2,
+    gap: 4,
   },
   metaText: {
     ...Typography.caption,
     color: Colors.textSecondary,
     flexShrink: 1,
   },
-  categoryTag: {
-    marginLeft: Spacing.xs,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: 2,
-    borderRadius: Radius.full,
+  notesPreview: {
+    ...Typography.caption,
+    color: Colors.textTertiary,
+    flexShrink: 1,
+    fontStyle: 'italic',
   },
-  categoryTagText: {
-    ...Typography.micro,
-  },
+
+  // ── Status chip
   statusChip: {
-    minWidth: 72,
-    height: 28,
-    borderRadius: Radius.full,
-    paddingHorizontal: Spacing.sm,
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    gap: 4,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 5,
+    borderRadius: Radius.full,
     marginLeft: Spacing.sm,
   },
-  statusChipText: {
+  statusText: {
     ...Typography.micro,
     fontWeight: '700',
+  },
+
+  // ── Index badge
+  indexBadge: {
+    position: 'absolute',
+    top: -6,
+    right: -6,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: Colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...Shadows.glyph,
+  },
+  indexText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: Colors.surface,
+    lineHeight: 12,
   },
 });

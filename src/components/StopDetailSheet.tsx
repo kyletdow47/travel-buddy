@@ -1,51 +1,30 @@
-import { useEffect, useRef } from 'react';
+import { useCallback } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  Modal,
-  Animated,
-  Image,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   Linking,
-  Dimensions,
   Platform,
+  ScrollView,
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import type { Stop } from '../types';
-import { Colors, Typography, Spacing, Radius, Shadows } from '../constants/theme';
+import { Colors, Typography, Spacing, Radius } from '../constants/theme';
+import { FrostedSheet } from './FrostedSheet';
+import { CategoryGlyph, normalizeCategory, categoryColor } from './CategoryGlyph';
+import { QuickActionCircle } from './QuickActionCircle';
 
-type CategoryKey = 'hotel' | 'food' | 'gas' | 'activity' | 'other';
 type StopStatus = 'upcoming' | 'current' | 'done';
-
-const CATEGORY_META: Record<
-  CategoryKey,
-  { label: string; icon: keyof typeof Ionicons.glyphMap; color: string }
-> = {
-  hotel: { label: 'Hotel', icon: 'bed-outline', color: Colors.category.hotel },
-  food: { label: 'Food', icon: 'restaurant-outline', color: Colors.category.food },
-  gas: { label: 'Gas', icon: 'car-outline', color: Colors.category.gas },
-  activity: { label: 'Activity', icon: 'bicycle-outline', color: Colors.category.activity },
-  other: { label: 'Other', icon: 'ellipse-outline', color: Colors.category.other },
-};
-
-function normalizeCategory(raw: string | null | undefined): CategoryKey {
-  const value = (raw ?? '').toLowerCase();
-  if (value === 'hotel' || value === 'food' || value === 'gas' || value === 'activity') {
-    return value;
-  }
-  return 'other';
-}
 
 function statusMeta(status: StopStatus) {
   switch (status) {
     case 'current':
-      return { label: '▸ Now', color: Colors.primary, bg: Colors.primaryLight };
+      return { label: 'Now', color: Colors.primary, bg: Colors.primaryLight };
     case 'done':
-      return { label: '✓ Done', color: Colors.textSecondary, bg: Colors.border };
+      return { label: 'Done', color: Colors.textSecondary, bg: Colors.border };
     default:
-      return { label: '⬡ Upcoming', color: Colors.info, bg: 'rgba(59,130,246,0.12)' };
+      return { label: 'Upcoming', color: Colors.info, bg: 'rgba(58,164,255,0.12)' };
   }
 }
 
@@ -53,308 +32,243 @@ function formatDate(iso: string | null) {
   if (!iso) return null;
   return new Date(iso).toLocaleDateString('en-US', {
     weekday: 'short',
-    month: 'short',
+    month: 'long',
     day: 'numeric',
   });
 }
 
 type Props = {
   stop: Stop | null;
-  photoUrl?: string | null;
   visible: boolean;
   onClose: () => void;
   onEdit?: () => void;
   onStatusCycle?: () => void;
+  onDelete?: () => void;
 };
-
-const SCREEN_H = Dimensions.get('window').height;
-const MAX_SHEET_H = SCREEN_H * 0.55;
 
 export function StopDetailSheet({
   stop,
-  photoUrl,
   visible,
   onClose,
   onEdit,
   onStatusCycle,
+  onDelete,
 }: Props) {
-  const translateY = useRef(new Animated.Value(MAX_SHEET_H)).current;
-  const backdrop = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    if (visible) {
-      Animated.parallel([
-        Animated.spring(translateY, {
-          toValue: 0,
-          useNativeDriver: true,
-          damping: 18,
-          stiffness: 180,
-          mass: 0.9,
-        }),
-        Animated.timing(backdrop, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    } else {
-      Animated.parallel([
-        Animated.timing(translateY, {
-          toValue: MAX_SHEET_H,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(backdrop, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }
-  }, [visible, translateY, backdrop]);
+  const openDirections = useCallback(() => {
+    if (!stop) return;
+    const query = encodeURIComponent(stop.location ?? stop.name);
+    const url =
+      stop.lat != null && stop.lng != null
+        ? Platform.OS === 'ios'
+          ? `http://maps.apple.com/?q=${query}&ll=${stop.lat},${stop.lng}`
+          : `https://www.google.com/maps/search/?api=1&query=${stop.lat},${stop.lng}`
+        : Platform.OS === 'ios'
+          ? `http://maps.apple.com/?q=${query}`
+          : `https://www.google.com/maps/search/?api=1&query=${query}`;
+    Linking.openURL(url).catch(() => undefined);
+  }, [stop]);
 
   if (!stop) return null;
 
-  const category = normalizeCategory(stop.category);
-  const cMeta = CATEGORY_META[category];
+  const cat = normalizeCategory(stop.category);
+  const accentColor = categoryColor(stop.category);
   const status = (stop.status as StopStatus) ?? 'upcoming';
   const sMeta = statusMeta(status);
   const dateLabel = formatDate(stop.planned_date);
 
-  const openDirections = () => {
-    if (stop.lat == null || stop.lng == null) return;
-    const query = encodeURIComponent(stop.name);
-    const url =
-      Platform.OS === 'ios'
-        ? `http://maps.apple.com/?q=${query}&ll=${stop.lat},${stop.lng}`
-        : `https://www.google.com/maps/search/?api=1&query=${stop.lat},${stop.lng}`;
-    Linking.openURL(url).catch(() => undefined);
-  };
-
   return (
-    <Modal transparent visible={visible} animationType="none" onRequestClose={onClose}>
-      <View style={StyleSheet.absoluteFill}>
-        <TouchableWithoutFeedback onPress={onClose}>
-          <Animated.View
-            style={[
-              StyleSheet.absoluteFill,
-              styles.backdrop,
-              { opacity: backdrop },
-            ]}
-          />
-        </TouchableWithoutFeedback>
-
-        <Animated.View
-          style={[
-            styles.sheet,
-            { transform: [{ translateY }], maxHeight: MAX_SHEET_H },
-          ]}
-        >
-          <View style={styles.handle} />
-
-          {/* Hero */}
-          {photoUrl ? (
-            <Image source={{ uri: photoUrl }} style={styles.hero} />
-          ) : (
-            <View style={[styles.hero, { backgroundColor: `${cMeta.color}22` }]}>
-              <Ionicons name={cMeta.icon} size={48} color={cMeta.color} />
-            </View>
-          )}
-
-          {/* Content */}
-          <View style={styles.content}>
-            <Text style={styles.name} numberOfLines={1}>
+    <FrostedSheet
+      visible={visible}
+      onClose={onClose}
+      tint="light"
+      maxHeightRatio={0.72}
+      accessibilityLabel={`Stop details: ${stop.name}`}
+    >
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scroll}
+      >
+        {/* Hero row — large CategoryGlyph + title */}
+        <View style={styles.heroRow}>
+          <View style={[styles.heroGlyph, { backgroundColor: `${accentColor}18` }]}>
+            <CategoryGlyph category={cat} size={44} elevated />
+          </View>
+          <View style={styles.heroText}>
+            <Text style={styles.name} numberOfLines={2}>
               {stop.name}
             </Text>
-
-            <View style={styles.metaRow}>
-              <Ionicons name="location-outline" size={14} color={Colors.textSecondary} />
-              <Text style={styles.metaText} numberOfLines={1}>
-                {stop.location ?? 'Location TBD'}
-              </Text>
-            </View>
-
-            <View style={styles.chipsRow}>
-              <View style={[styles.chip, { backgroundColor: `${cMeta.color}1A` }]}>
-                <Ionicons name={cMeta.icon} size={12} color={cMeta.color} />
-                <Text style={[styles.chipText, { color: cMeta.color }]}>{cMeta.label}</Text>
-              </View>
-              {dateLabel && (
-                <View style={[styles.chip, { backgroundColor: Colors.background }]}>
-                  <Ionicons
-                    name="calendar-outline"
-                    size={12}
-                    color={Colors.textSecondary}
-                  />
-                  <Text style={[styles.chipText, { color: Colors.textSecondary }]}>
-                    {dateLabel}
-                  </Text>
-                </View>
-              )}
-              <TouchableOpacity
-                activeOpacity={0.8}
-                style={[styles.statusChip, { backgroundColor: sMeta.bg }]}
-                onPress={onStatusCycle}
-                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-              >
-                <Text style={[styles.statusChipText, { color: sMeta.color }]}>
-                  {sMeta.label}
+            {stop.location ? (
+              <View style={styles.locationRow}>
+                <Ionicons name="location-outline" size={13} color={Colors.textTertiary} />
+                <Text style={styles.locationText} numberOfLines={1}>
+                  {stop.location}
                 </Text>
-              </TouchableOpacity>
-            </View>
-
-            {stop.notes ? (
-              <View style={styles.notes}>
-                <Text style={styles.notesText}>{stop.notes}</Text>
               </View>
             ) : null}
-
-            {/* Action row */}
-            <View style={styles.actions}>
-              <TouchableOpacity
-                style={styles.primaryAction}
-                activeOpacity={0.85}
-                onPress={openDirections}
-              >
-                <Ionicons name="navigate-outline" size={18} color={Colors.surface} />
-                <Text style={styles.primaryActionText}>Get Directions</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.ghostAction}
-                activeOpacity={0.85}
-                onPress={onEdit}
-              >
-                <Ionicons name="create-outline" size={18} color={Colors.text} />
-                <Text style={styles.ghostActionText}>Edit</Text>
-              </TouchableOpacity>
-            </View>
           </View>
-        </Animated.View>
-      </View>
-    </Modal>
+        </View>
+
+        {/* Chips row */}
+        <View style={styles.chipsRow}>
+          {/* Status chip — tappable to cycle */}
+          <TouchableOpacity
+            style={[styles.chip, { backgroundColor: sMeta.bg }]}
+            activeOpacity={0.8}
+            onPress={onStatusCycle}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Text style={[styles.chipText, { color: sMeta.color }]}>
+              {sMeta.label}
+            </Text>
+          </TouchableOpacity>
+
+          {/* Category chip */}
+          <View style={[styles.chip, { backgroundColor: `${accentColor}18` }]}>
+            <CategoryGlyph category={cat} size={28} variant="tinted" elevated={false} />
+            <Text style={[styles.chipText, { color: accentColor }]}>
+              {cat.charAt(0).toUpperCase() + cat.slice(1)}
+            </Text>
+          </View>
+
+          {/* Date chip */}
+          {dateLabel ? (
+            <View style={[styles.chip, { backgroundColor: Colors.surfaceDim }]}>
+              <Ionicons name="calendar-outline" size={12} color={Colors.textSecondary} />
+              <Text style={[styles.chipText, { color: Colors.textSecondary }]}>
+                {dateLabel}
+              </Text>
+            </View>
+          ) : null}
+        </View>
+
+        {/* Notes */}
+        {stop.notes ? (
+          <View style={styles.notesBox}>
+            <Ionicons name="document-text-outline" size={14} color={Colors.textTertiary} />
+            <Text style={styles.notesText}>{stop.notes}</Text>
+          </View>
+        ) : null}
+
+        {/* Divider */}
+        <View style={styles.divider} />
+
+        {/* Quick actions */}
+        <View style={styles.actionsRow}>
+          <QuickActionCircle
+            icon="navigate"
+            label="Directions"
+            primary
+            onPress={openDirections}
+          />
+          <QuickActionCircle
+            icon="create-outline"
+            label="Edit"
+            onPress={onEdit}
+          />
+          <QuickActionCircle
+            icon="repeat-outline"
+            label="Status"
+            onPress={onStatusCycle}
+          />
+          {onDelete ? (
+            <QuickActionCircle
+              icon="trash-outline"
+              label="Delete"
+              onPress={onDelete}
+            />
+          ) : null}
+        </View>
+      </ScrollView>
+    </FrostedSheet>
   );
 }
 
 const styles = StyleSheet.create({
-  backdrop: {
-    backgroundColor: Colors.overlay,
-  },
-  sheet: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: Colors.surface,
-    borderTopLeftRadius: Radius.xxl,
-    borderTopRightRadius: Radius.xxl,
+  scroll: {
     paddingBottom: Spacing.xl,
-    ...Shadows.lg,
   },
-  handle: {
-    alignSelf: 'center',
-    width: 32,
-    height: 4,
-    borderRadius: Radius.full,
-    backgroundColor: Colors.border,
-    marginTop: Spacing.sm,
-    marginBottom: Spacing.sm,
+
+  // Hero
+  heroRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+    marginBottom: Spacing.md,
   },
-  hero: {
-    width: '100%',
-    height: 180,
+  heroGlyph: {
+    width: 72,
+    height: 72,
+    borderRadius: Radius.xl,
     alignItems: 'center',
     justifyContent: 'center',
+    flexShrink: 0,
   },
-  content: {
-    padding: Spacing.lg,
+  heroText: {
+    flex: 1,
+    gap: 4,
   },
   name: {
     ...Typography.h2,
     color: Colors.text,
+    lineHeight: 26,
   },
-  metaRow: {
+  locationRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.xs,
-    marginTop: Spacing.xs,
+    gap: 4,
   },
-  metaText: {
+  locationText: {
     ...Typography.caption,
     color: Colors.textSecondary,
     flex: 1,
   },
+
+  // Chips
   chipsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: Spacing.xs,
-    marginTop: Spacing.md,
+    marginBottom: Spacing.md,
   },
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.xs,
+    gap: 5,
     paddingHorizontal: Spacing.sm,
-    paddingVertical: 4,
+    paddingVertical: 5,
     borderRadius: Radius.full,
   },
   chipText: {
     ...Typography.micro,
-  },
-  statusChip: {
-    paddingHorizontal: Spacing.md,
-    paddingVertical: 6,
-    borderRadius: Radius.full,
-  },
-  statusChipText: {
-    ...Typography.micro,
     fontWeight: '700',
   },
-  notes: {
-    marginTop: Spacing.md,
-    padding: Spacing.md,
-    borderRadius: Radius.md,
+
+  // Notes
+  notesBox: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: Spacing.xs,
     backgroundColor: Colors.background,
+    borderRadius: Radius.md,
+    padding: Spacing.md,
+    marginBottom: Spacing.md,
   },
   notesText: {
     ...Typography.body,
     color: Colors.text,
-  },
-  actions: {
-    flexDirection: 'row',
-    gap: Spacing.sm,
-    marginTop: Spacing.lg,
-  },
-  primaryAction: {
-    flex: 2,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: Spacing.xs,
-    backgroundColor: Colors.primary,
-    paddingVertical: Spacing.md,
-    borderRadius: Radius.full,
-    ...Shadows.sm,
-  },
-  primaryActionText: {
-    ...Typography.bodyMed,
-    color: Colors.surface,
-    fontWeight: '700',
-  },
-  ghostAction: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: Spacing.xs,
-    backgroundColor: Colors.background,
-    paddingVertical: Spacing.md,
-    borderRadius: Radius.full,
-    borderWidth: 1,
-    borderColor: Colors.border,
   },
-  ghostActionText: {
-    ...Typography.bodyMed,
-    color: Colors.text,
-    fontWeight: '600',
+
+  divider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: Colors.border,
+    marginVertical: Spacing.md,
+  },
+
+  // Actions
+  actionsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingHorizontal: Spacing.sm,
   },
 });

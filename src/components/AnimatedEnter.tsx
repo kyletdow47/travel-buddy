@@ -11,6 +11,7 @@ type Props = {
   style?: StyleProp<ViewStyle>;
   duration?: number;
   translateYFrom?: number;
+  delay?: number;
 };
 
 // Fade + slide-up entrance. Skipped entirely when reduce-motion is on.
@@ -19,6 +20,7 @@ export function AnimatedEnter({
   style,
   duration = 300,
   translateYFrom = 12,
+  delay = 0,
 }: Props) {
   const opacity = useRef(new Animated.Value(0)).current;
   const translateY = useRef(new Animated.Value(translateYFrom)).current;
@@ -32,11 +34,17 @@ export function AnimatedEnter({
 
   useEffect(() => {
     if (reduceMotion) return;
-    Animated.parallel([
+    const anim = Animated.parallel([
       Animated.timing(opacity, { toValue: 1, duration, useNativeDriver: true }),
       Animated.timing(translateY, { toValue: 0, duration, useNativeDriver: true }),
-    ]).start();
-  }, [opacity, translateY, duration, reduceMotion]);
+    ]);
+    if (delay > 0) {
+      const timer = setTimeout(() => anim.start(), delay);
+      return () => clearTimeout(timer);
+    }
+    anim.start();
+    return undefined;
+  }, [opacity, translateY, duration, delay, reduceMotion]);
 
   if (reduceMotion) {
     return <Animated.View style={style}>{children}</Animated.View>;
