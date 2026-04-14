@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -6,20 +6,25 @@ import {
   ScrollView,
   TouchableOpacity,
   FlatList,
+  RefreshControl,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import type { Trip, Receipt } from '../../src/types';
+import type { Receipt } from '../../src/types';
+import { useTrips } from '../../src/hooks/useTrips';
+import { useReceipts } from '../../src/hooks/useReceipts';
 import {
   ReceiptRow,
   ReceiptSeparator,
   normalizeReceiptCategory,
 } from '../../src/components/ReceiptRow';
+import { AddReceiptModal } from '../../src/components/AddReceiptModal';
+import { ReceiptDetailSheet } from '../../src/components/ReceiptDetailSheet';
+import { AnimatedEnter } from '../../src/components/AnimatedEnter';
+import { Skeleton } from '../../src/components/SkeletonLoader';
 import { Colors, Typography, Spacing, Radius, Shadows } from '../../src/constants/theme';
 import { haptics } from '../../src/lib/haptics';
-
-const MOCK_TRIPS: Trip[] = [];
-const MOCK_RECEIPTS: Receipt[] = [];
 
 type FilterCategory = 'All' | 'Food' | 'Hotel' | 'Gas' | 'Activity' | 'Other';
 const FILTERS: FilterCategory[] = ['All', 'Food', 'Hotel', 'Gas', 'Activity', 'Other'];
@@ -51,63 +56,114 @@ function budgetRemainingColor(remaining: number) {
 }
 
 export default function ReceiptsScreen() {
-  const [trips] = useState<Trip[]>(MOCK_TRIPS);
-  const [receipts] = useState<Receipt[]>(MOCK_RECEIPTS);
-  const [activeTripId, setActiveTripId] = useState<string | null>(trips[0]?.id ?? null);
+  const { trips, loading: tripsLoading, refresh: refreshTrips } = useTrips();
+  const [activeTripId, setActiveTripId] = useState<string | null>(null);
+
+  const resolvedTripId = activeTripId ?? trips[0]?.id ?? null;
+  const activeTrip = useMemo(
+    () => trips.find((t) => t.id === resolvedTripId) ?? null,
+    [trips, resolvedTripId],
+  );
+
+  const {
+    receipts,
+    loading: receiptsLoading,
+    refresh: refreshReceipts,
+    addReceipt,
+    removeReceipt,
+  } = useReceipts(resolvedTripId);
+
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null);
   const [activeFilter, setActiveFilter] = useState<FilterCategory>('All');
 
-  const activeTrip = useMemo(
-    () => trips.find((t) => t.id === activeTripId) ?? null,
-    [trips, activeTripId],
-  );
-
-  const tripReceipts = useMemo(
-    () => (activeTripId ? receipts.filter((r) => r.trip_id === activeTripId) : []),
-    [receipts, activeTripId],
-  );
-
   const totalSpent = useMemo(
-    () => tripReceipts.reduce((sum, r) => sum + (r.amount ?? 0), 0),
-    [tripReceipts],
+    () => receipts.reduce((sum, r) => sum + (r.amount ?? 0), 0),
+    [receipts],
   );
 
   const budget = activeTrip?.budget ?? 0;
   const remaining = budget - totalSpent;
   const percent = budget > 0 ? Math.min(1, totalSpent / budget) : 0;
 
-  // Category totals + counts
   const categoryStats = useMemo(() => {
     const stats: Record<string, { total: number; count: number }> = {};
-    tripReceipts.forEach((r) => {
+    receipts.forEach((r) => {
       const key = normalizeReceiptCategory(r.category);
       if (!stats[key]) stats[key] = { total: 0, count: 0 };
       stats[key].total += r.amount ?? 0;
       stats[key].count += 1;
     });
     return stats;
-  }, [tripReceipts]);
+  }, [receipts]);
 
   const filteredReceipts = useMemo(() => {
-    if (activeFilter === 'All') return tripReceipts;
+    if (activeFilter === 'All') return receipts;
     const needle = activeFilter.toLowerCase();
-    return tripReceipts.filter(
+    return receipts.filter(
       (r) => normalizeReceiptCategory(r.category) === needle,
     );
-  }, [tripReceipts, activeFilter]);
+  }, [receipts, activeFilter]);
+
+  const loading = tripsLoading || receiptsLoading;
+
+  const onRefresh = useCallback(async () => {
+    await Promise.all([refreshTrips(), refreshReceipts()]);
+  }, [refreshTrips, refreshReceipts]);
+
+  const handleDelete = useCallback(
+    (receipt: Receipt) => {
+      Alert.alert('Delete receipt', `Remove "${receipt.merchant}"?`, [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            haptics.warning();
+            setSelectedReceipt(null);
+            await removeReceipt(receipt.id);
+          },
+        },
+      ]);
+    },
+    [removeReceipt],
+  );
+
+  // ── No trips at all
+  if (!tripsLoading && trips.length === 0) {
+    return (
+      <SafeAreaView style={styles.safe} edges={['top']}>
+        <FullEmpty />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
       <FlatList
         data={filteredReceipts}
         keyExtractor={(r) => String(r.id)}
-        renderItem={({ item }) => <ReceiptRow receipt={item} />}
+        renderItem={({ item, index }) => (
+          <AnimatedEnter delay={index * 40}>
+            <ReceiptRow
+              receipt={item}
+              onPress={() => {
+                haptics.selection();
+                setSelectedReceipt(item);
+              }}
+            />
+          </AnimatedEnter>
+        )}
         ItemSeparatorComponent={ReceiptSeparator}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
+        refreshControl={
+          <RefreshControl refreshing={loading} onRefresh={onRefresh} tintColor={Colors.primary} />
+        }
         ListHeaderComponent={
           <Header
             trips={trips}
-            activeTripId={activeTripId}
+            activeTripId={resolvedTripId}
             setActiveTripId={setActiveTripId}
             totalSpent={totalSpent}
             budget={budget}
@@ -116,22 +172,60 @@ export default function ReceiptsScreen() {
             categoryStats={categoryStats}
             activeFilter={activeFilter}
             setActiveFilter={setActiveFilter}
+            loading={loading}
+            receiptCount={receipts.length}
           />
         }
-        ListEmptyComponent={<Empty hasReceipts={tripReceipts.length > 0} />}
+        ListEmptyComponent={
+          loading && receipts.length === 0 ? (
+            <ReceiptsSkeleton />
+          ) : (
+            <Empty
+              hasReceipts={receipts.length > 0}
+              onAdd={() => setAddModalOpen(true)}
+            />
+          )
+        }
       />
 
       {/* FAB */}
       <TouchableOpacity
         style={styles.fab}
         activeOpacity={0.85}
-        onPress={() => haptics.medium()}
+        onPress={() => {
+          haptics.medium();
+          setAddModalOpen(true);
+        }}
       >
         <Ionicons name="add" size={26} color={Colors.surface} />
       </TouchableOpacity>
+
+      {/* Add Receipt Modal */}
+      {resolvedTripId && (
+        <AddReceiptModal
+          visible={addModalOpen}
+          tripId={resolvedTripId}
+          onClose={() => setAddModalOpen(false)}
+          onAdd={addReceipt}
+        />
+      )}
+
+      {/* Receipt Detail Sheet */}
+      <ReceiptDetailSheet
+        receipt={selectedReceipt}
+        visible={selectedReceipt !== null}
+        onClose={() => setSelectedReceipt(null)}
+        onEdit={() => {
+          // TODO: open EditReceiptModal
+          setSelectedReceipt(null);
+        }}
+        onDelete={selectedReceipt ? () => handleDelete(selectedReceipt) : undefined}
+      />
     </SafeAreaView>
   );
 }
+
+// ── Sub-components ──────────────────────────────────────────────────────────
 
 function Header({
   trips,
@@ -144,8 +238,10 @@ function Header({
   categoryStats,
   activeFilter,
   setActiveFilter,
+  loading,
+  receiptCount,
 }: {
-  trips: Trip[];
+  trips: { id: string; name: string }[];
   activeTripId: string | null;
   setActiveTripId: (id: string) => void;
   totalSpent: number;
@@ -155,6 +251,8 @@ function Header({
   categoryStats: Record<string, { total: number; count: number }>;
   activeFilter: FilterCategory;
   setActiveFilter: (f: FilterCategory) => void;
+  loading: boolean;
+  receiptCount: number;
 }) {
   return (
     <View>
@@ -193,77 +291,85 @@ function Header({
       )}
 
       {/* Stats card */}
-      <View style={styles.statsCard}>
-        <View style={styles.statsHeaderRow}>
-          <Text style={styles.statsLabel}>Total Spent</Text>
-          <Text style={styles.statsAmount}>${totalSpent.toFixed(2)}</Text>
-        </View>
-
-        {budget > 0 && (
-          <>
-            <View style={styles.divider} />
-            <View style={styles.statsMetaRow}>
-              <Text style={styles.statsMetaText}>Budget: ${budget.toLocaleString()}</Text>
-              <Text style={[styles.statsMetaText, { color: Colors.textSecondary }]}>
-                {Math.round(percent * 100)}%
-              </Text>
+      <AnimatedEnter>
+        <View style={styles.statsCard}>
+          <View style={styles.statsHeaderRow}>
+            <View>
+              <Text style={styles.statsLabel}>Total Spent</Text>
+              <Text style={styles.statsAmount}>${totalSpent.toFixed(2)}</Text>
             </View>
-            <View style={styles.progressTrack}>
-              <View
+            <View style={styles.receiptCountBadge}>
+              <Ionicons name="receipt-outline" size={14} color={Colors.primary} />
+              <Text style={styles.receiptCountText}>{receiptCount}</Text>
+            </View>
+          </View>
+
+          {budget > 0 && (
+            <>
+              <View style={styles.divider} />
+              <View style={styles.statsMetaRow}>
+                <Text style={styles.statsMetaText}>Budget: ${budget.toLocaleString()}</Text>
+                <Text style={[styles.statsMetaText, { color: Colors.textSecondary }]}>
+                  {Math.round(percent * 100)}%
+                </Text>
+              </View>
+              <View style={styles.progressTrack}>
+                <View
+                  style={[
+                    styles.progressFill,
+                    { width: `${percent * 100}%`, backgroundColor: budgetBarColor(percent) },
+                  ]}
+                />
+              </View>
+              <Text
                 style={[
-                  styles.progressFill,
-                  { width: `${percent * 100}%`, backgroundColor: budgetBarColor(percent) },
+                  styles.remaining,
+                  { color: budgetRemainingColor(remaining) },
                 ]}
-              />
-            </View>
-            <Text
-              style={[
-                styles.remaining,
-                { color: budgetRemainingColor(remaining) },
-              ]}
-            >
-              {remaining >= 0
-                ? `Remaining: $${remaining.toFixed(2)}`
-                : `Over by $${Math.abs(remaining).toFixed(2)}`}
-            </Text>
-          </>
-        )}
+              >
+                {remaining >= 0
+                  ? `Remaining: $${remaining.toFixed(2)}`
+                  : `Over by $${Math.abs(remaining).toFixed(2)}`}
+              </Text>
+            </>
+          )}
 
-        {Object.keys(categoryStats).length > 0 && (
-          <>
-            <View style={styles.divider} />
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.breakdownRow}
-            >
-              {Object.entries(categoryStats).map(([cat, stat]) => {
-                const capKey = (cat.charAt(0).toUpperCase() + cat.slice(1)) as
-                  | Exclude<FilterCategory, 'All'>;
-                const color = CATEGORY_COLORS[capKey] ?? Colors.category.other;
-                const icon = CATEGORY_ICONS[capKey] ?? 'pricetag-outline';
-                return (
-                  <View
-                    key={cat}
-                    style={[
-                      styles.breakdownChip,
-                      { borderLeftColor: color },
-                    ]}
-                  >
-                    <Ionicons name={icon} size={14} color={color} />
-                    <View>
-                      <Text style={styles.breakdownCategory}>{capKey}</Text>
-                      <Text style={styles.breakdownAmount}>
-                        ${stat.total.toFixed(0)}
-                      </Text>
+          {Object.keys(categoryStats).length > 0 && (
+            <>
+              <View style={styles.divider} />
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.breakdownRow}
+              >
+                {Object.entries(categoryStats).map(([cat, stat]) => {
+                  const capKey = (cat.charAt(0).toUpperCase() + cat.slice(1)) as
+                    | Exclude<FilterCategory, 'All'>;
+                  const color = CATEGORY_COLORS[capKey] ?? Colors.category.other;
+                  const icon = CATEGORY_ICONS[capKey] ?? 'pricetag-outline';
+                  return (
+                    <View
+                      key={cat}
+                      style={[
+                        styles.breakdownChip,
+                        { borderLeftColor: color },
+                      ]}
+                    >
+                      <Ionicons name={icon} size={14} color={color} />
+                      <View>
+                        <Text style={styles.breakdownCategory}>{capKey}</Text>
+                        <Text style={styles.breakdownAmount}>
+                          ${stat.total.toFixed(0)}
+                        </Text>
+                      </View>
                     </View>
-                  </View>
-                );
-              })}
-            </ScrollView>
-          </>
-        )}
-      </View>
+                  );
+                })}
+              </ScrollView>
+            </>
+          )}
+        </View>
+      </AnimatedEnter>
 
       {/* Filter chips */}
       <ScrollView
@@ -306,7 +412,17 @@ function Header({
   );
 }
 
-function Empty({ hasReceipts }: { hasReceipts: boolean }) {
+function ReceiptsSkeleton() {
+  return (
+    <View style={styles.skeletonWrap}>
+      {[1, 2, 3, 4].map((i) => (
+        <Skeleton key={i} width="100%" height={64} borderRadius={0} style={styles.skeletonRow} />
+      ))}
+    </View>
+  );
+}
+
+function Empty({ hasReceipts, onAdd }: { hasReceipts: boolean; onAdd: () => void }) {
   if (hasReceipts) {
     return (
       <View style={styles.emptyInline}>
@@ -323,13 +439,27 @@ function Empty({ hasReceipts }: { hasReceipts: boolean }) {
       <Text style={styles.emptySubtitle}>
         Track your spending by adding receipts as you travel.
       </Text>
-      <TouchableOpacity style={styles.ctaButton} activeOpacity={0.85}>
+      <TouchableOpacity style={styles.ctaButton} activeOpacity={0.85} onPress={onAdd}>
         <Ionicons name="add" size={18} color={Colors.surface} />
         <Text style={styles.ctaButtonText}>Add First Receipt</Text>
       </TouchableOpacity>
     </View>
   );
 }
+
+function FullEmpty() {
+  return (
+    <View style={styles.fullEmpty}>
+      <Ionicons name="wallet-outline" size={56} color={Colors.textTertiary} />
+      <Text style={styles.fullEmptyTitle}>No trips yet</Text>
+      <Text style={styles.fullEmptySubtitle}>
+        Create a trip from the Home tab to start tracking expenses.
+      </Text>
+    </View>
+  );
+}
+
+// ── Styles ─────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
   safe: {
@@ -343,15 +473,16 @@ const styles = StyleSheet.create({
   // Trip selector
   selectorRow: {
     paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
+    paddingTop: Spacing.md,
+    paddingBottom: Spacing.sm,
     gap: Spacing.sm,
   },
   selectorChip: {
     paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
+    paddingVertical: 7,
     borderRadius: Radius.full,
     backgroundColor: Colors.surface,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: Colors.border,
     maxWidth: 200,
   },
@@ -374,25 +505,40 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
     padding: Spacing.lg,
     backgroundColor: Colors.surface,
-    borderRadius: Radius.lg,
-    borderWidth: 1,
+    borderRadius: Radius.xl,
+    borderWidth: StyleSheet.hairlineWidth,
     borderColor: Colors.border,
     ...Shadows.md,
   },
   statsHeaderRow: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
+    alignItems: 'flex-start',
     justifyContent: 'space-between',
   },
   statsLabel: {
     ...Typography.caption,
     color: Colors.textSecondary,
+    marginBottom: 2,
   },
   statsAmount: {
     fontSize: 28,
     fontWeight: '800',
     color: Colors.primary,
     lineHeight: 32,
+  },
+  receiptCountBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: Colors.primaryLight,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 4,
+    borderRadius: Radius.full,
+  },
+  receiptCountText: {
+    ...Typography.micro,
+    fontWeight: '800',
+    color: Colors.primary,
   },
   divider: {
     height: StyleSheet.hairlineWidth,
@@ -461,7 +607,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.xs,
     borderRadius: Radius.full,
     backgroundColor: Colors.surface,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: Colors.border,
   },
   filterChipActive: {
@@ -477,32 +623,46 @@ const styles = StyleSheet.create({
     color: Colors.surface,
   },
 
+  // Skeleton
+  skeletonWrap: {
+    gap: 1,
+  },
+  skeletonRow: {
+    marginBottom: 0,
+  },
+
   // Empty state
   empty: {
     alignItems: 'center',
     paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.xxxl,
+    marginHorizontal: Spacing.lg,
+    marginTop: Spacing.md,
+    backgroundColor: Colors.surface,
+    borderRadius: Radius.xl,
+    borderWidth: 1.5,
+    borderColor: Colors.border,
+    borderStyle: 'dashed',
+    gap: Spacing.sm,
   },
   emptyIcon: {
     width: 72,
     height: 72,
     borderRadius: Radius.full,
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.background,
     alignItems: 'center',
     justifyContent: 'center',
     ...Shadows.sm,
-    marginBottom: Spacing.md,
   },
   emptyTitle: {
     ...Typography.h3,
     color: Colors.text,
-    marginBottom: Spacing.xs,
+    marginTop: Spacing.xs,
   },
   emptySubtitle: {
     ...Typography.body,
     color: Colors.textSecondary,
     textAlign: 'center',
-    marginBottom: Spacing.xl,
   },
   emptyInline: {
     alignItems: 'center',
@@ -518,14 +678,33 @@ const styles = StyleSheet.create({
     gap: Spacing.xs,
     backgroundColor: Colors.primary,
     paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.xl,
+    paddingHorizontal: Spacing.lg,
     borderRadius: Radius.full,
+    marginTop: Spacing.sm,
     ...Shadows.sm,
   },
   ctaButtonText: {
     ...Typography.bodyMed,
     color: Colors.surface,
     fontWeight: '700',
+  },
+
+  // Full empty (no trips)
+  fullEmpty: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: Spacing.xxl,
+    gap: Spacing.md,
+  },
+  fullEmptyTitle: {
+    ...Typography.h2,
+    color: Colors.text,
+  },
+  fullEmptySubtitle: {
+    ...Typography.body,
+    color: Colors.textSecondary,
+    textAlign: 'center',
   },
 
   // FAB

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -7,37 +7,40 @@ import {
   TouchableOpacity,
   Animated,
   Platform,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import type { Trip, Stop } from '../../src/types';
+import type { Stop } from '../../src/types';
+import { useTrips } from '../../src/hooks/useTrips';
+import { useStops } from '../../src/hooks/useStops';
 import { MapPhotoMarker } from '../../src/components/MapPhotoMarker';
 import { StopDetailSheet } from '../../src/components/StopDetailSheet';
 import { Colors, Typography, Spacing, Radius, Shadows } from '../../src/constants/theme';
 import { haptics } from '../../src/lib/haptics';
 
-// Placeholder data — swap for useTrips/useStops hooks when wired.
-const MOCK_TRIPS: Trip[] = [];
-const MOCK_STOPS: Stop[] = [];
-
 export default function MapScreen() {
-  const [trips] = useState<Trip[]>(MOCK_TRIPS);
-  const [stops] = useState<Stop[]>(MOCK_STOPS);
-  const [activeTripId, setActiveTripId] = useState<string | null>(
-    trips[0]?.id ?? null,
+  const { trips, loading: tripsLoading } = useTrips();
+  const [activeTripId, setActiveTripId] = useState<string | null>(null);
+
+  const resolvedTripId = activeTripId ?? trips[0]?.id ?? null;
+  const activeTrip = useMemo(
+    () => trips.find((t) => t.id === resolvedTripId) ?? null,
+    [trips, resolvedTripId],
   );
+
+  const {
+    stops,
+    loading: stopsLoading,
+    cycleStatus,
+    removeStop,
+  } = useStops(resolvedTripId);
+
   const [selectedStop, setSelectedStop] = useState<Stop | null>(null);
 
-  const activeTrip = useMemo(
-    () => trips.find((t) => t.id === activeTripId) ?? null,
-    [trips, activeTripId],
-  );
   const tripStops = useMemo(
-    () =>
-      activeTripId
-        ? stops.filter((s) => s.trip_id === activeTripId && s.lat != null && s.lng != null)
-        : [],
-    [stops, activeTripId],
+    () => stops.filter((s) => s.lat != null && s.lng != null),
+    [stops],
   );
 
   const fabScale = useMemo(() => new Animated.Value(1), []);
@@ -49,6 +52,32 @@ export default function MapScreen() {
     ]).start();
   };
 
+  const handleStatusCycle = useCallback(
+    async (stop: Stop) => {
+      haptics.selection();
+      await cycleStatus(stop.id, stop.status);
+    },
+    [cycleStatus],
+  );
+
+  const handleDelete = useCallback(
+    (stop: Stop) => {
+      Alert.alert('Delete stop', `Remove "${stop.name}"?`, [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            haptics.warning();
+            setSelectedStop(null);
+            await removeStop(stop.id);
+          },
+        },
+      ]);
+    },
+    [removeStop],
+  );
+
   return (
     <View style={styles.container}>
       {/* Map surface placeholder — full-screen MapView rendered here when wired. */}
@@ -57,21 +86,28 @@ export default function MapScreen() {
           <Ionicons name="map-outline" size={48} color={Colors.primary} />
           <Text style={styles.mapPlaceholderText}>
             {tripStops.length > 0
-              ? `${tripStops.length} stops ready to render`
-              : 'Map renders here when stops have coordinates'}
+              ? `${tripStops.length} stop${tripStops.length !== 1 ? 's' : ''} ready to render`
+              : stops.length > 0
+                ? 'Add coordinates to stops to see them on the map'
+                : 'Map renders here when stops have coordinates'}
           </Text>
         </View>
         {/* Demo cluster of markers stacked visually to showcase design */}
         {tripStops.slice(0, 3).map((stop, idx) => (
-          <View
-            key={stop.id ?? idx}
+          <TouchableOpacity
+            key={stop.id}
             style={[styles.markerAnchor, { top: 120 + idx * 60, left: 40 + idx * 72 }]}
+            activeOpacity={0.85}
+            onPress={() => {
+              haptics.selection();
+              setSelectedStop(stop);
+            }}
           >
             <MapPhotoMarker
               stop={stop}
               isSelected={selectedStop?.id === stop.id}
             />
-          </View>
+          </TouchableOpacity>
         ))}
       </View>
 
@@ -85,11 +121,13 @@ export default function MapScreen() {
           >
             {trips.length === 0 ? (
               <View style={styles.emptyChip}>
-                <Text style={styles.emptyChipText}>No trips to display</Text>
+                <Text style={styles.emptyChipText}>
+                  {tripsLoading ? 'Loading trips…' : 'No trips to display'}
+                </Text>
               </View>
             ) : (
               trips.map((trip) => {
-                const active = trip.id === activeTripId;
+                const active = trip.id === resolvedTripId;
                 return (
                   <TouchableOpacity
                     key={trip.id}
@@ -143,6 +181,12 @@ export default function MapScreen() {
         stop={selectedStop}
         visible={!!selectedStop}
         onClose={() => setSelectedStop(null)}
+        onStatusCycle={
+          selectedStop
+            ? () => handleStatusCycle(selectedStop)
+            : undefined
+        }
+        onDelete={selectedStop ? () => handleDelete(selectedStop) : undefined}
       />
     </View>
   );
@@ -202,7 +246,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm,
     borderRadius: Radius.full,
     backgroundColor: Colors.surface,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: Colors.border,
     maxWidth: 200,
   },
