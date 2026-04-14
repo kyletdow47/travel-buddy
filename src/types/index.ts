@@ -14,6 +14,10 @@ export type Receipt = Database['public']['Tables']['receipts']['Row'];
 export type ReceiptInsert = Database['public']['Tables']['receipts']['Insert'];
 export type ReceiptUpdate = Database['public']['Tables']['receipts']['Update'];
 
+export type PackingItem = Database['public']['Tables']['packing_items']['Row'];
+export type PackingItemInsert = Database['public']['Tables']['packing_items']['Insert'];
+export type PackingItemUpdate = Database['public']['Tables']['packing_items']['Update'];
+
 export type Conversation = Database['public']['Tables']['conversations']['Row'];
 export type ConversationInsert = Database['public']['Tables']['conversations']['Insert'];
 export type ConversationUpdate = Database['public']['Tables']['conversations']['Update'];

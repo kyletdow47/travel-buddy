@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import { Colors, Typography, Spacing, Radius } from '../constants/theme';
 import { FrostedSheet } from './FrostedSheet';
 import { CategoryGlyph, normalizeCategory, categoryColor } from './CategoryGlyph';
 import { QuickActionCircle } from './QuickActionCircle';
+import { ChangeDateSheet } from './ChangeDateSheet';
 
 type StopStatus = 'upcoming' | 'current' | 'done';
 
@@ -44,6 +45,7 @@ type Props = {
   onEdit?: () => void;
   onStatusCycle?: () => void;
   onDelete?: () => void;
+  onChangeDate?: (newDate: string | null) => void;
 };
 
 export function StopDetailSheet({
@@ -53,7 +55,10 @@ export function StopDetailSheet({
   onEdit,
   onStatusCycle,
   onDelete,
+  onChangeDate,
 }: Props) {
+  const [changeDateOpen, setChangeDateOpen] = useState(false);
+
   const openDirections = useCallback(() => {
     if (!stop) return;
     const query = encodeURIComponent(stop.location ?? stop.name);
@@ -166,6 +171,11 @@ export function StopDetailSheet({
             onPress={onEdit}
           />
           <QuickActionCircle
+            icon="calendar-outline"
+            label="Date"
+            onPress={() => setChangeDateOpen(true)}
+          />
+          <QuickActionCircle
             icon="repeat-outline"
             label="Status"
             onPress={onStatusCycle}
@@ -179,6 +189,17 @@ export function StopDetailSheet({
           ) : null}
         </View>
       </ScrollView>
+
+      {/* Change Date Sheet */}
+      {stop && onChangeDate ? (
+        <ChangeDateSheet
+          visible={changeDateOpen}
+          currentDate={stop.planned_date}
+          stopName={stop.name}
+          onClose={() => setChangeDateOpen(false)}
+          onSave={onChangeDate}
+        />
+      ) : null}
     </FrostedSheet>
   );
 }

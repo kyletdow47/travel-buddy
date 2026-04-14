@@ -99,11 +99,29 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="packing"
+        options={{
+          title: 'Packing',
+          tabBarIcon: ({ color, size, focused }) => (
+            <TabIcon name="cube-outline" color={color} size={size} focused={focused} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="receipts"
         options={{
           title: 'Receipts',
           tabBarIcon: ({ color, size, focused }) => (
             <TabIcon name="receipt-outline" color={color} size={size} focused={focused} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Profile',
+          tabBarIcon: ({ color, size, focused }) => (
+            <TabIcon name="person-outline" color={color} size={size} focused={focused} />
           ),
         }}
       />

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -11,33 +11,53 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
+  ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { AIOrb } from '../../src/components/AIOrb';
+import { useTrips } from '../../src/hooks/useTrips';
+import { useConversation } from '../../src/hooks/useConversation';
+import type { ChatMessage } from '../../src/hooks/useConversation';
+import type { Trip } from '../../src/types';
 import { Colors, Typography, Spacing, Radius, Shadows } from '../../src/constants/theme';
 import { haptics } from '../../src/lib/haptics';
 
-type Role = 'user' | 'assistant';
-
-type Message = {
-  id: string;
-  role: Role;
-  content: string;
-  createdAt: number;
-};
-
-const SUGGESTIONS = [
+const GENERIC_SUGGESTIONS = [
   'Plan a trip to Tokyo',
   'What to pack for Bali?',
   'Budget for 7 days in Europe',
 ];
 
+function tripSuggestions(trip: Trip): string[] {
+  const name = trip.name;
+  return [
+    `Plan activities for ${name}`,
+    `What should I pack for ${name}?`,
+    `Budget tips for ${name}`,
+  ];
+}
+
 export default function AssistantScreen() {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const { trips, loading: tripsLoading } = useTrips();
+  const [activeTripId, setActiveTripId] = useState<string | null>(null);
+
+  const resolvedTripId = activeTripId ?? trips[0]?.id ?? null;
+  const activeTrip = useMemo(
+    () => trips.find((t) => t.id === resolvedTripId) ?? null,
+    [trips, resolvedTripId],
+  );
+
+  const {
+    messages,
+    loading: convoLoading,
+    isThinking,
+    sendMessage,
+    clearConversation,
+  } = useConversation(resolvedTripId);
+
   const [input, setInput] = useState('');
-  const [isThinking, setIsThinking] = useState(false);
-  const listRef = useRef<FlatList<Message>>(null);
+  const listRef = useRef<FlatList<ChatMessage>>(null);
   const sendScale = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -56,40 +76,34 @@ export default function AssistantScreen() {
 
   const handleSend = () => {
     const text = input.trim();
-    if (!text) return;
+    if (!text || !resolvedTripId) return;
     haptics.light();
-    const userMsg: Message = {
-      id: `u-${Date.now()}`,
-      role: 'user',
-      content: text,
-      createdAt: Date.now(),
-    };
-    setMessages((prev) => [...prev, userMsg]);
+    sendMessage(text);
     setInput('');
-    setIsThinking(true);
-    // Simulated response — swap with real AI call.
-    setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: `a-${Date.now()}`,
-          role: 'assistant',
-          content: 'That sounds exciting. Tell me a bit more and I will sketch out an itinerary for you.',
-          createdAt: Date.now(),
-        },
-      ]);
-      setIsThinking(false);
-    }, 900);
   };
 
   const handleNewChat = () => {
     haptics.medium();
-    setMessages([]);
+    clearConversation();
     setInput('');
-    setIsThinking(false);
   };
 
-  const showEmpty = messages.length === 0 && !isThinking;
+  const showEmpty = messages.length === 0 && !isThinking && !convoLoading;
+
+  const suggestions = useMemo(() => {
+    if (activeTrip) return tripSuggestions(activeTrip);
+    return GENERIC_SUGGESTIONS;
+  }, [activeTrip]);
+
+  const handleSuggestionPress = (text: string) => {
+    if (!resolvedTripId) {
+      // No trip selected — just populate input
+      setInput(text);
+      return;
+    }
+    haptics.light();
+    sendMessage(text);
+  };
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
@@ -106,6 +120,37 @@ export default function AssistantScreen() {
         </TouchableOpacity>
       </View>
 
+      {/* Trip selector chips */}
+      {trips.length > 0 && (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.selectorRow}
+        >
+          {trips.map((trip) => {
+            const active = trip.id === resolvedTripId;
+            return (
+              <TouchableOpacity
+                key={trip.id}
+                activeOpacity={0.85}
+                style={[styles.selectorChip, active && styles.selectorChipActive]}
+                onPress={() => {
+                  haptics.selection();
+                  setActiveTripId(trip.id);
+                }}
+              >
+                <Text
+                  style={[styles.selectorText, active && styles.selectorTextActive]}
+                  numberOfLines={1}
+                >
+                  {trip.name}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+      )}
+
       <KeyboardAvoidingView
         style={styles.kbAvoid}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -114,7 +159,11 @@ export default function AssistantScreen() {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
           <View style={styles.body}>
             {showEmpty ? (
-              <EmptyState onSuggestionPress={(s) => setInput(s)} />
+              <EmptyState
+                suggestions={suggestions}
+                hasTripSelected={resolvedTripId !== null}
+                onSuggestionPress={handleSuggestionPress}
+              />
             ) : (
               <FlatList
                 ref={listRef}
@@ -139,13 +188,18 @@ export default function AssistantScreen() {
             <TextInput
               value={input}
               onChangeText={setInput}
-              placeholder="Ask me anything..."
+              placeholder={
+                resolvedTripId
+                  ? 'Ask me anything...'
+                  : 'Select a trip to start chatting...'
+              }
               placeholderTextColor={Colors.textTertiary}
               style={styles.input}
               multiline
               maxLength={2000}
+              editable={resolvedTripId !== null}
             />
-            {input.trim().length === 0 && (
+            {input.trim().length === 0 && resolvedTripId !== null && (
               <TouchableOpacity activeOpacity={0.7} style={styles.micButton}>
                 <Ionicons name="mic-outline" size={20} color={Colors.primary} />
               </TouchableOpacity>
@@ -164,7 +218,7 @@ export default function AssistantScreen() {
               onPress={handleSend}
               activeOpacity={0.85}
               style={styles.sendButton}
-              disabled={input.trim().length === 0}
+              disabled={input.trim().length === 0 || resolvedTripId === null}
             >
               <Ionicons name="arrow-up" size={18} color={Colors.surface} />
             </TouchableOpacity>
@@ -175,7 +229,7 @@ export default function AssistantScreen() {
   );
 }
 
-function ChatBubble({ message, showAvatar }: { message: Message; showAvatar: boolean }) {
+function ChatBubble({ message, showAvatar }: { message: ChatMessage; showAvatar: boolean }) {
   if (message.role === 'user') {
     return (
       <View style={styles.userRow}>
@@ -238,16 +292,26 @@ function TypingIndicator() {
   );
 }
 
-function EmptyState({ onSuggestionPress }: { onSuggestionPress: (text: string) => void }) {
+function EmptyState({
+  suggestions,
+  hasTripSelected,
+  onSuggestionPress,
+}: {
+  suggestions: string[];
+  hasTripSelected: boolean;
+  onSuggestionPress: (text: string) => void;
+}) {
   return (
     <View style={styles.empty}>
       <AIOrb size={64} state="idle" />
       <Text style={styles.emptyTitle}>Travel Buddy AI</Text>
       <Text style={styles.emptySubtitle}>
-        Ask me about destinations, itineraries, packing lists, budgets…
+        {hasTripSelected
+          ? 'Ask me about this trip — activities, packing, budgets, and more.'
+          : 'Select a trip above to get personalised suggestions, or ask a general question.'}
       </Text>
       <View style={styles.suggestions}>
-        {SUGGESTIONS.map((text) => (
+        {suggestions.map((text) => (
           <TouchableOpacity
             key={text}
             activeOpacity={0.85}
@@ -296,6 +360,35 @@ const styles = StyleSheet.create({
     height: 36,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+
+  // Trip selector (matches receipts / plan screens)
+  selectorRow: {
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.md,
+    paddingBottom: Spacing.sm,
+    gap: Spacing.sm,
+  },
+  selectorChip: {
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 7,
+    borderRadius: Radius.full,
+    backgroundColor: Colors.surface,
+    borderWidth: 1.5,
+    borderColor: Colors.border,
+    maxWidth: 200,
+  },
+  selectorChipActive: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  selectorText: {
+    ...Typography.caption,
+    fontWeight: '600',
+    color: Colors.textSecondary,
+  },
+  selectorTextActive: {
+    color: Colors.surface,
   },
 
   // List

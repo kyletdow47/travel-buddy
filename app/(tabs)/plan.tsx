@@ -13,6 +13,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useTrips } from '../../src/hooks/useTrips';
 import { useStops } from '../../src/hooks/useStops';
 import { StopRow } from '../../src/components/StopRow';
+import { CompactStopRow } from '../../src/components/CompactStopRow';
 import { AddStopModal } from '../../src/components/AddStopModal';
 import { EditStopModal } from '../../src/components/EditStopModal';
 import { StopDetailSheet } from '../../src/components/StopDetailSheet';
@@ -70,6 +71,7 @@ export default function PlanScreen() {
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [editingStop, setEditingStop] = useState<Stop | null>(null);
   const [selectedStop, setSelectedStop] = useState<Stop | null>(null);
+  const [compactView, setCompactView] = useState(false);
 
   const { grouped, sortedKeys } = useMemo(() => groupStopsByDate(stops), [stops]);
 
@@ -101,6 +103,19 @@ export default function PlanScreen() {
       ]);
     },
     [removeStop],
+  );
+
+  const handleChangeDate = useCallback(
+    async (newDate: string | null) => {
+      if (!selectedStop) return;
+      haptics.selection();
+      await editStop(selectedStop.id, { planned_date: newDate });
+      // Update the selected stop in local state so the sheet reflects the change
+      setSelectedStop((prev) =>
+        prev ? { ...prev, planned_date: newDate } : null,
+      );
+    },
+    [selectedStop, editStop],
   );
 
   const loading = tripsLoading || stopsLoading;
@@ -160,6 +175,20 @@ export default function PlanScreen() {
               {stops.length > 0 ? `  ·  ${stops.length} stop${stops.length !== 1 ? 's' : ''}` : ''}
             </Text>
           </View>
+          <TouchableOpacity
+            style={styles.viewToggle}
+            activeOpacity={0.8}
+            onPress={() => {
+              haptics.selection();
+              setCompactView((v) => !v);
+            }}
+          >
+            <Ionicons
+              name={compactView ? 'list' : 'reorder-three'}
+              size={20}
+              color={Colors.textSecondary}
+            />
+          </TouchableOpacity>
           <TouchableOpacity
             style={styles.addFAB}
             activeOpacity={0.85}
@@ -224,19 +253,33 @@ export default function PlanScreen() {
                   </View>
 
                   {/* Stops */}
-                  {dayStops.map((stop, idx) => (
-                    <StopRow
-                      key={stop.id}
-                      stop={stop}
-                      index={idx}
-                      showConnector={idx < dayStops.length - 1}
-                      onPress={() => {
-                        haptics.selection();
-                        setSelectedStop(stop);
-                      }}
-                      onStatusPress={() => handleStatusCycle(stop)}
-                    />
-                  ))}
+                  {dayStops.map((stop, idx) =>
+                    compactView ? (
+                      <CompactStopRow
+                        key={stop.id}
+                        stop={stop}
+                        index={idx}
+                        showConnector={idx < dayStops.length - 1}
+                        onPress={() => {
+                          haptics.selection();
+                          setSelectedStop(stop);
+                        }}
+                        onStatusPress={() => handleStatusCycle(stop)}
+                      />
+                    ) : (
+                      <StopRow
+                        key={stop.id}
+                        stop={stop}
+                        index={idx}
+                        showConnector={idx < dayStops.length - 1}
+                        onPress={() => {
+                          haptics.selection();
+                          setSelectedStop(stop);
+                        }}
+                        onStatusPress={() => handleStatusCycle(stop)}
+                      />
+                    ),
+                  )}
                 </View>
               </AnimatedEnter>
             );
@@ -277,6 +320,7 @@ export default function PlanScreen() {
             : undefined
         }
         onDelete={selectedStop ? () => handleDelete(selectedStop) : undefined}
+        onChangeDate={handleChangeDate}
       />
     </SafeAreaView>
   );
@@ -388,6 +432,15 @@ const styles = StyleSheet.create({
   bannerMeta: {
     ...Typography.caption,
     color: Colors.textSecondary,
+  },
+  viewToggle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: Colors.surfaceDim,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: Spacing.xs,
   },
   addFAB: {
     width: 40,

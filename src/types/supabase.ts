@@ -176,6 +176,44 @@ export interface Database {
           }
         ];
       };
+      packing_items: {
+        Row: {
+          id: string;
+          trip_id: string | null;
+          name: string;
+          category: string | null;
+          packed: boolean;
+          assigned_to: string | null;
+          created_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          trip_id?: string | null;
+          name: string;
+          category?: string | null;
+          packed?: boolean;
+          assigned_to?: string | null;
+          created_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          trip_id?: string | null;
+          name?: string;
+          category?: string | null;
+          packed?: boolean;
+          assigned_to?: string | null;
+          created_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'packing_items_trip_id_fkey';
+            columns: ['trip_id'];
+            isOneToOne: false;
+            referencedRelation: 'trips';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
       conversations: {
         Row: {
           id: string;
