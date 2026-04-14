@@ -21,6 +21,15 @@ import { TripActionSheet } from '../../src/components/TripActionSheet';
 import { CategoryGlyph } from '../../src/components/CategoryGlyph';
 import type { PhotoAttribution } from '../../src/lib/unsplash';
 
+const TRIP_SECTIONS = [
+  { route: '/trip/flights', label: 'Flights', icon: 'airplane-outline', color: '#3B82F6', bg: '#EFF6FF' },
+  { route: '/trip/reservations', label: 'Reservations', icon: 'document-text-outline', color: '#8B5CF6', bg: '#F5F3FF' },
+  { route: '/trip/journal', label: 'Journal', icon: 'book-outline', color: '#10B981', bg: '#ECFDF5' },
+  { route: '/trip/members', label: 'Members', icon: 'people-outline', color: '#F59E0B', bg: '#FFFBEB' },
+  { route: '/trip/bookings', label: 'Bookings', icon: 'pricetag-outline', color: '#EC4899', bg: '#FDF2F8' },
+  { route: '/trip/recap', label: 'Recap', icon: 'trophy-outline', color: '#F26A1C', bg: '#FFF7ED' },
+] as const;
+
 export default function TripHomeScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
@@ -148,6 +157,22 @@ export default function TripHomeScreen() {
         <Text style={[Typography.eyebrow, styles.organizerEyebrow]}>Organizer</Text>
 
         <TripQuickActionRow onAction={handleQuickAction} />
+
+        {/* Trip section shortcuts */}
+        <View style={styles.sectionGrid}>
+          {TRIP_SECTIONS.map((sec) => (
+            <Pressable
+              key={sec.route}
+              style={({ pressed }) => [styles.sectionCard, pressed && { opacity: 0.8 }]}
+              onPress={() => router.push({ pathname: sec.route as any, params: { tripId: id } })}
+            >
+              <View style={[styles.sectionIcon, { backgroundColor: sec.bg }]}>
+                <Ionicons name={sec.icon as any} size={20} color={sec.color} />
+              </View>
+              <Text style={styles.sectionLabel}>{sec.label}</Text>
+            </Pressable>
+          ))}
+        </View>
 
         {grouped.length === 0 ? (
           <View style={styles.emptyBlock}>
@@ -298,6 +323,37 @@ const styles = StyleSheet.create({
   stopDate: {
     ...Typography.caption,
     color: Colors.textSecondary,
+  },
+  sectionGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    paddingHorizontal: Spacing.lg,
+    gap: Spacing.sm,
+    marginTop: Spacing.md,
+    marginBottom: Spacing.sm,
+  },
+  sectionCard: {
+    width: '30%' as any,
+    alignItems: 'center' as const,
+    paddingVertical: Spacing.md,
+    backgroundColor: Colors.surface,
+    borderRadius: Radius.lg,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: Colors.border,
+    gap: Spacing.xs,
+    ...Shadows.sm,
+  },
+  sectionIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  },
+  sectionLabel: {
+    ...Typography.micro,
+    color: Colors.text,
+    fontWeight: '600' as const,
   },
   emptyBlock: {
     padding: Spacing.xl,

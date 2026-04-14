@@ -175,6 +175,39 @@ export default function ProfileScreen() {
               router.push('/paywall');
             }}
           />
+
+          <View style={styles.rowDivider} />
+
+          <SettingRow
+            icon="grid-outline"
+            label="Widgets & Watch"
+            onPress={() => {
+              haptics.light();
+              router.push('/widget-config');
+            }}
+          />
+
+          <View style={styles.rowDivider} />
+
+          <SettingRow
+            icon="notifications-outline"
+            label="Notification Center"
+            onPress={() => {
+              haptics.light();
+              router.push('/notifications');
+            }}
+          />
+
+          <View style={styles.rowDivider} />
+
+          <SettingRow
+            icon="bookmark-outline"
+            label="Saved Spots"
+            onPress={() => {
+              haptics.light();
+              router.push('/saved-spots');
+            }}
+          />
         </View>
 
         <View style={styles.sectionCard}>

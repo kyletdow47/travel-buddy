@@ -24,6 +24,7 @@ import { EditReceiptModal } from '../../src/components/EditReceiptModal';
 import { ReceiptDetailSheet } from '../../src/components/ReceiptDetailSheet';
 import { AnimatedEnter } from '../../src/components/AnimatedEnter';
 import { Skeleton } from '../../src/components/SkeletonLoader';
+import { BudgetProgressBar } from '../../src/components/BudgetProgressBar';
 import { Colors, Typography, Spacing, Radius, Shadows } from '../../src/constants/theme';
 import { haptics } from '../../src/lib/haptics';
 
@@ -45,12 +46,6 @@ const CATEGORY_ICONS: Record<Exclude<FilterCategory, 'All'>, keyof typeof Ionico
   Activity: 'bicycle-outline',
   Other: 'pricetag-outline',
 };
-
-function budgetBarColor(percent: number) {
-  if (percent >= 0.95) return Colors.error;
-  if (percent >= 0.8) return Colors.warning;
-  return Colors.primary;
-}
 
 function budgetRemainingColor(remaining: number) {
   return remaining >= 0 ? Colors.success : Colors.error;
@@ -318,20 +313,7 @@ function Header({
           {budget > 0 && (
             <>
               <View style={styles.divider} />
-              <View style={styles.statsMetaRow}>
-                <Text style={styles.statsMetaText}>Budget: ${budget.toLocaleString()}</Text>
-                <Text style={[styles.statsMetaText, { color: Colors.textSecondary }]}>
-                  {Math.round(percent * 100)}%
-                </Text>
-              </View>
-              <View style={styles.progressTrack}>
-                <View
-                  style={[
-                    styles.progressFill,
-                    { width: `${percent * 100}%`, backgroundColor: budgetBarColor(percent) },
-                  ]}
-                />
-              </View>
+              <BudgetProgressBar spent={totalSpent} budget={budget} />
               <Text
                 style={[
                   styles.remaining,
@@ -555,26 +537,6 @@ const styles = StyleSheet.create({
     height: StyleSheet.hairlineWidth,
     backgroundColor: Colors.border,
     marginVertical: Spacing.md,
-  },
-  statsMetaRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: Spacing.sm,
-  },
-  statsMetaText: {
-    ...Typography.caption,
-    color: Colors.text,
-  },
-  progressTrack: {
-    height: 8,
-    borderRadius: Radius.xs,
-    backgroundColor: Colors.border,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    borderRadius: Radius.xs,
   },
   remaining: {
     ...Typography.caption,

@@ -21,3 +21,19 @@ export type PackingItemUpdate = Database['public']['Tables']['packing_items']['U
 export type Conversation = Database['public']['Tables']['conversations']['Row'];
 export type ConversationInsert = Database['public']['Tables']['conversations']['Insert'];
 export type ConversationUpdate = Database['public']['Tables']['conversations']['Update'];
+
+export type Reservation = Database['public']['Tables']['reservations']['Row'];
+export type ReservationInsert = Database['public']['Tables']['reservations']['Insert'];
+export type ReservationUpdate = Database['public']['Tables']['reservations']['Update'];
+
+export type JournalEntry = Database['public']['Tables']['journal_entries']['Row'];
+export type JournalEntryInsert = Database['public']['Tables']['journal_entries']['Insert'];
+export type JournalEntryUpdate = Database['public']['Tables']['journal_entries']['Update'];
+
+export type AppNotification = Database['public']['Tables']['notifications']['Row'];
+export type AppNotificationInsert = Database['public']['Tables']['notifications']['Insert'];
+export type AppNotificationUpdate = Database['public']['Tables']['notifications']['Update'];
+
+export type SavedSpot = Database['public']['Tables']['saved_spots']['Row'];
+export type SavedSpotInsert = Database['public']['Tables']['saved_spots']['Insert'];
+export type SavedSpotUpdate = Database['public']['Tables']['saved_spots']['Update'];
