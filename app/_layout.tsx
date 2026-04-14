@@ -4,6 +4,7 @@ import { useColorScheme } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { Colors } from '../src/constants/theme';
+import { tintedToastConfig } from '../src/components/TintedToast';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -20,7 +21,7 @@ export default function RootLayout() {
         }}
       />
       <StatusBar style={isDark ? 'light' : 'dark'} />
-      <Toast />
+      <Toast config={tintedToastConfig} />
     </SafeAreaProvider>
   );
 }
