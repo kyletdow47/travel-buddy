@@ -18,6 +18,13 @@ export interface Database {
           budget: number | null;
           spent: number | null;
           status: string | null;
+          cover_photo_url: string | null;
+          cover_photo_attribution: string | null;
+          source: string | null;
+          timezone: string | null;
+          country_code: string | null;
+          country_flag: string | null;
+          archived_at: string | null;
           created_at: string | null;
         };
         Insert: {
@@ -28,6 +35,13 @@ export interface Database {
           budget?: number | null;
           spent?: number | null;
           status?: string | null;
+          cover_photo_url?: string | null;
+          cover_photo_attribution?: string | null;
+          source?: string | null;
+          timezone?: string | null;
+          country_code?: string | null;
+          country_flag?: string | null;
+          archived_at?: string | null;
           created_at?: string | null;
         };
         Update: {
@@ -38,6 +52,13 @@ export interface Database {
           budget?: number | null;
           spent?: number | null;
           status?: string | null;
+          cover_photo_url?: string | null;
+          cover_photo_attribution?: string | null;
+          source?: string | null;
+          timezone?: string | null;
+          country_code?: string | null;
+          country_flag?: string | null;
+          archived_at?: string | null;
           created_at?: string | null;
         };
         Relationships: [];
@@ -155,6 +176,44 @@ export interface Database {
           }
         ];
       };
+      packing_items: {
+        Row: {
+          id: string;
+          trip_id: string | null;
+          name: string;
+          category: string | null;
+          packed: boolean;
+          assigned_to: string | null;
+          created_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          trip_id?: string | null;
+          name: string;
+          category?: string | null;
+          packed?: boolean;
+          assigned_to?: string | null;
+          created_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          trip_id?: string | null;
+          name?: string;
+          category?: string | null;
+          packed?: boolean;
+          assigned_to?: string | null;
+          created_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'packing_items_trip_id_fkey';
+            columns: ['trip_id'];
+            isOneToOne: false;
+            referencedRelation: 'trips';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
       conversations: {
         Row: {
           id: string;
@@ -183,6 +242,187 @@ export interface Database {
             referencedColumns: ['id'];
           }
         ];
+      };
+      journal_entries: {
+        Row: {
+          id: string;
+          trip_id: string | null;
+          stop_id: string | null;
+          title: string | null;
+          body: string | null;
+          photo_urls: Json;
+          mood: string | null;
+          created_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          trip_id?: string | null;
+          stop_id?: string | null;
+          title?: string | null;
+          body?: string | null;
+          photo_urls?: Json;
+          mood?: string | null;
+          created_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          trip_id?: string | null;
+          stop_id?: string | null;
+          title?: string | null;
+          body?: string | null;
+          photo_urls?: Json;
+          mood?: string | null;
+          created_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'journal_entries_trip_id_fkey';
+            columns: ['trip_id'];
+            isOneToOne: false;
+            referencedRelation: 'trips';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'journal_entries_stop_id_fkey';
+            columns: ['stop_id'];
+            isOneToOne: false;
+            referencedRelation: 'stops';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      reservations: {
+        Row: {
+          id: string;
+          trip_id: string | null;
+          type: string;
+          confirmation_code: string | null;
+          provider: string | null;
+          start_datetime: string | null;
+          end_datetime: string | null;
+          location: string | null;
+          notes: string | null;
+          status: string | null;
+          created_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          trip_id?: string | null;
+          type: string;
+          confirmation_code?: string | null;
+          provider?: string | null;
+          start_datetime?: string | null;
+          end_datetime?: string | null;
+          location?: string | null;
+          notes?: string | null;
+          status?: string | null;
+          created_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          trip_id?: string | null;
+          type?: string;
+          confirmation_code?: string | null;
+          provider?: string | null;
+          start_datetime?: string | null;
+          end_datetime?: string | null;
+          location?: string | null;
+          notes?: string | null;
+          status?: string | null;
+          created_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'reservations_trip_id_fkey';
+            columns: ['trip_id'];
+            isOneToOne: false;
+            referencedRelation: 'trips';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      notifications: {
+        Row: {
+          id: string;
+          trip_id: string | null;
+          title: string;
+          body: string | null;
+          type: string;
+          read: boolean;
+          created_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          trip_id?: string | null;
+          title: string;
+          body?: string | null;
+          type?: string;
+          read?: boolean;
+          created_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          trip_id?: string | null;
+          title?: string;
+          body?: string | null;
+          type?: string;
+          read?: boolean;
+          created_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'notifications_trip_id_fkey';
+            columns: ['trip_id'];
+            isOneToOne: false;
+            referencedRelation: 'trips';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      saved_spots: {
+        Row: {
+          id: string;
+          user_id: string | null;
+          name: string;
+          source_url: string | null;
+          source_platform: string | null;
+          image_url: string | null;
+          location: string | null;
+          lat: number | null;
+          lng: number | null;
+          notes: string | null;
+          imported_to_trip_id: string | null;
+          created_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id?: string | null;
+          name: string;
+          source_url?: string | null;
+          source_platform?: string | null;
+          image_url?: string | null;
+          location?: string | null;
+          lat?: number | null;
+          lng?: number | null;
+          notes?: string | null;
+          imported_to_trip_id?: string | null;
+          created_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          user_id?: string | null;
+          name?: string;
+          source_url?: string | null;
+          source_platform?: string | null;
+          image_url?: string | null;
+          location?: string | null;
+          lat?: number | null;
+          lng?: number | null;
+          notes?: string | null;
+          imported_to_trip_id?: string | null;
+          created_at?: string | null;
+        };
+        Relationships: [];
       };
     };
     Views: Record<string, never>;
