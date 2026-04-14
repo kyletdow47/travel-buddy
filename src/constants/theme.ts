@@ -18,6 +18,67 @@ export const Colors = {
   },
 } as const;
 
+// Category palette — each category has a solid tint, a soft washed tint,
+// and a gradient pair used by GradientScreen and other tinted primitives.
+export type CategoryKey =
+  | 'default'
+  | 'flight'
+  | 'lodging'
+  | 'dining'
+  | 'activity'
+  | 'transit'
+  | 'shopping'
+  | 'sightseeing';
+
+export interface CategoryPalette {
+  tint: string;
+  soft: string;
+  gradient: readonly [string, string, string];
+}
+
+export const CategoryColors: Record<CategoryKey, CategoryPalette> = {
+  default: {
+    tint: '#E86540',
+    soft: '#FDECE4',
+    gradient: ['#FFF5EE', '#FDE4D4', '#FFFFFF'],
+  },
+  flight: {
+    tint: '#3B82F6',
+    soft: '#E0ECFF',
+    gradient: ['#EAF2FF', '#D7E6FF', '#FFFFFF'],
+  },
+  lodging: {
+    tint: '#8B5CF6',
+    soft: '#EDE4FF',
+    gradient: ['#F3ECFF', '#E3D4FF', '#FFFFFF'],
+  },
+  dining: {
+    tint: '#EF4444',
+    soft: '#FDE2E2',
+    gradient: ['#FFE8E8', '#FFD4D4', '#FFFFFF'],
+  },
+  activity: {
+    tint: '#10B981',
+    soft: '#DEF5EC',
+    gradient: ['#E6F7EF', '#CDEFDE', '#FFFFFF'],
+  },
+  transit: {
+    tint: '#14B8A6',
+    soft: '#D8F2EF',
+    gradient: ['#E3F5F2', '#C8ECE6', '#FFFFFF'],
+  },
+  shopping: {
+    tint: '#EC4899',
+    soft: '#FBDCEA',
+    gradient: ['#FDE5F0', '#FBCEDF', '#FFFFFF'],
+  },
+  sightseeing: {
+    tint: '#F59E0B',
+    soft: '#FBEACB',
+    gradient: ['#FEF3DA', '#FDE1A8', '#FFFFFF'],
+  },
+} as const;
+
 export const Typography = {
   h1: { fontSize: 28, fontWeight: '700' },
   h2: { fontSize: 22, fontWeight: '600' },
