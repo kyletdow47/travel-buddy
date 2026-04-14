@@ -14,6 +14,7 @@ import { useTrips } from '../../src/hooks/useTrips';
 import { useStops } from '../../src/hooks/useStops';
 import { StopRow } from '../../src/components/StopRow';
 import { AddStopModal } from '../../src/components/AddStopModal';
+import { EditStopModal } from '../../src/components/EditStopModal';
 import { StopDetailSheet } from '../../src/components/StopDetailSheet';
 import { AnimatedEnter } from '../../src/components/AnimatedEnter';
 import { Skeleton } from '../../src/components/SkeletonLoader';
@@ -63,9 +64,11 @@ export default function PlanScreen() {
     addStop,
     cycleStatus,
     removeStop,
+    editStop,
   } = useStops(resolvedTripId);
 
   const [addModalOpen, setAddModalOpen] = useState(false);
+  const [editingStop, setEditingStop] = useState<Stop | null>(null);
   const [selectedStop, setSelectedStop] = useState<Stop | null>(null);
 
   const { grouped, sortedKeys } = useMemo(() => groupStopsByDate(stops), [stops]);
@@ -251,13 +254,21 @@ export default function PlanScreen() {
         />
       )}
 
+      {/* Edit Stop Modal */}
+      <EditStopModal
+        visible={editingStop !== null}
+        stop={editingStop}
+        onClose={() => setEditingStop(null)}
+        onSave={editStop}
+      />
+
       {/* Stop Detail Sheet */}
       <StopDetailSheet
         stop={selectedStop}
         visible={selectedStop !== null}
         onClose={() => setSelectedStop(null)}
         onEdit={() => {
-          // TODO: open EditStopModal
+          setEditingStop(selectedStop);
           setSelectedStop(null);
         }}
         onStatusCycle={

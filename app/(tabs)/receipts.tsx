@@ -20,6 +20,7 @@ import {
   normalizeReceiptCategory,
 } from '../../src/components/ReceiptRow';
 import { AddReceiptModal } from '../../src/components/AddReceiptModal';
+import { EditReceiptModal } from '../../src/components/EditReceiptModal';
 import { ReceiptDetailSheet } from '../../src/components/ReceiptDetailSheet';
 import { AnimatedEnter } from '../../src/components/AnimatedEnter';
 import { Skeleton } from '../../src/components/SkeletonLoader';
@@ -70,10 +71,12 @@ export default function ReceiptsScreen() {
     loading: receiptsLoading,
     refresh: refreshReceipts,
     addReceipt,
+    editReceipt,
     removeReceipt,
   } = useReceipts(resolvedTripId);
 
   const [addModalOpen, setAddModalOpen] = useState(false);
+  const [editingReceipt, setEditingReceipt] = useState<Receipt | null>(null);
   const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null);
   const [activeFilter, setActiveFilter] = useState<FilterCategory>('All');
 
@@ -210,13 +213,21 @@ export default function ReceiptsScreen() {
         />
       )}
 
+      {/* Edit Receipt Modal */}
+      <EditReceiptModal
+        visible={editingReceipt !== null}
+        receipt={editingReceipt}
+        onClose={() => setEditingReceipt(null)}
+        onSave={editReceipt}
+      />
+
       {/* Receipt Detail Sheet */}
       <ReceiptDetailSheet
         receipt={selectedReceipt}
         visible={selectedReceipt !== null}
         onClose={() => setSelectedReceipt(null)}
         onEdit={() => {
-          // TODO: open EditReceiptModal
+          setEditingReceipt(selectedReceipt);
           setSelectedReceipt(null);
         }}
         onDelete={selectedReceipt ? () => handleDelete(selectedReceipt) : undefined}

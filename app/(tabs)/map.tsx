@@ -15,6 +15,7 @@ import type { Stop } from '../../src/types';
 import { useTrips } from '../../src/hooks/useTrips';
 import { useStops } from '../../src/hooks/useStops';
 import { MapPhotoMarker } from '../../src/components/MapPhotoMarker';
+import { EditStopModal } from '../../src/components/EditStopModal';
 import { StopDetailSheet } from '../../src/components/StopDetailSheet';
 import { Colors, Typography, Spacing, Radius, Shadows } from '../../src/constants/theme';
 import { haptics } from '../../src/lib/haptics';
@@ -34,9 +35,11 @@ export default function MapScreen() {
     loading: stopsLoading,
     cycleStatus,
     removeStop,
+    editStop,
   } = useStops(resolvedTripId);
 
   const [selectedStop, setSelectedStop] = useState<Stop | null>(null);
+  const [editingStop, setEditingStop] = useState<Stop | null>(null);
 
   const tripStops = useMemo(
     () => stops.filter((s) => s.lat != null && s.lng != null),
@@ -176,11 +179,23 @@ export default function MapScreen() {
         </TouchableOpacity>
       </Animated.View>
 
+      {/* Edit Stop Modal */}
+      <EditStopModal
+        visible={editingStop !== null}
+        stop={editingStop}
+        onClose={() => setEditingStop(null)}
+        onSave={editStop}
+      />
+
       {/* Stop detail sheet */}
       <StopDetailSheet
         stop={selectedStop}
         visible={!!selectedStop}
         onClose={() => setSelectedStop(null)}
+        onEdit={() => {
+          setEditingStop(selectedStop);
+          setSelectedStop(null);
+        }}
         onStatusCycle={
           selectedStop
             ? () => handleStatusCycle(selectedStop)
