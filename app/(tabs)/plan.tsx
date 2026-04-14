@@ -19,6 +19,8 @@ import { EditStopModal } from '../../src/components/EditStopModal';
 import { StopDetailSheet } from '../../src/components/StopDetailSheet';
 import { AnimatedEnter } from '../../src/components/AnimatedEnter';
 import { Skeleton } from '../../src/components/SkeletonLoader';
+import { WeatherRow } from '../../src/components/WeatherRow';
+import { useWeather, type DayWeatherRequest } from '../../src/hooks/useWeather';
 import { Colors, Typography, Spacing, Radius, Shadows } from '../../src/constants/theme';
 import { haptics } from '../../src/lib/haptics';
 import type { Stop } from '../../src/types';
@@ -74,6 +76,26 @@ export default function PlanScreen() {
   const [compactView, setCompactView] = useState(false);
 
   const { grouped, sortedKeys } = useMemo(() => groupStopsByDate(stops), [stops]);
+
+  // Pick a representative lat/lng per day for the weather forecast — first
+  // stop that actually has coordinates wins. Days with no geocoded stop just
+  // don't get a weather row.
+  const weatherRequests = useMemo<DayWeatherRequest[]>(() => {
+    const out: DayWeatherRequest[] = [];
+    for (const key of sortedKeys) {
+      if (key === UNSCHEDULED_KEY) continue;
+      const dayStops = grouped[key] ?? [];
+      const geo = dayStops.find(
+        (s) => typeof s.lat === 'number' && typeof s.lng === 'number',
+      );
+      if (geo && geo.lat != null && geo.lng != null) {
+        out.push({ dayKey: key, lat: geo.lat, lng: geo.lng });
+      }
+    }
+    return out;
+  }, [grouped, sortedKeys]);
+
+  const { forecasts: weatherByDay, loading: weatherLoading } = useWeather(weatherRequests);
 
   const onRefresh = useCallback(async () => {
     await Promise.all([refreshTrips(), refreshStops()]);
@@ -251,6 +273,14 @@ export default function PlanScreen() {
                       {dayStops.length} {dayStops.length === 1 ? 'stop' : 'stops'}
                     </Text>
                   </View>
+
+                  {/* Weather — only for scheduled days with a geocoded stop */}
+                  {!isUnscheduled && weatherByDay[key] !== undefined && (
+                    <WeatherRow
+                      forecast={weatherByDay[key]}
+                      loading={weatherLoading && weatherByDay[key] == null}
+                    />
+                  )}
 
                   {/* Stops */}
                   {dayStops.map((stop, idx) =>
