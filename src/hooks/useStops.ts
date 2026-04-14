@@ -4,6 +4,7 @@ import {
   createStop,
   updateStop,
   deleteStop,
+  reorderStops,
   updateStopStatus,
 } from '../services/stopsService';
 import type { Stop, StopInsert } from '../types';
@@ -79,5 +80,62 @@ export function useStops(tripId: string | null) {
     [],
   );
 
-  return { ...state, refresh: load, addStop, editStop, removeStop, cycleStatus };
+  /**
+   * Reorder a single day's stops while preserving the order of all other days.
+   *
+   * `dayKey` is the planned_date ISO string for the affected day, or null for
+   * the unscheduled bucket. `orderedIdsForDay` is the new order of stop ids
+   * within that day.
+   *
+   * The hook recomputes a global sort_order across every stop in the trip
+   * (preserving each existing day's previous position) and persists it.
+   */
+  const reorderStopsInDay = useCallback(
+    async (dayKey: string | null, orderedIdsForDay: string[]) => {
+      // Optimistic local update first
+      let nextStops: Stop[] = [];
+      setState((s) => {
+        const byId = new Map(s.stops.map((stop) => [stop.id, stop]));
+        const isDayMatch = (stop: Stop) =>
+          (stop.planned_date ?? null) === dayKey;
+
+        // Walk the existing stops in their current order and replace each
+        // matching-day stop with the next one from `orderedIdsForDay`.
+        const queue = [...orderedIdsForDay];
+        const reordered: Stop[] = s.stops.map((stop) => {
+          if (!isDayMatch(stop)) return stop;
+          const nextId = queue.shift();
+          if (!nextId) return stop;
+          return byId.get(nextId) ?? stop;
+        });
+
+        // Re-stamp sort_order so it stays a stable monotonic sequence.
+        const stamped = reordered.map((stop, idx) => ({
+          ...stop,
+          sort_order: idx,
+        }));
+        nextStops = stamped;
+        return { ...s, stops: stamped };
+      });
+
+      try {
+        await reorderStops(nextStops.map((stop) => stop.id));
+      } catch (err) {
+        // Revert by reloading authoritative state from the server.
+        await load();
+        throw err;
+      }
+    },
+    [load],
+  );
+
+  return {
+    ...state,
+    refresh: load,
+    addStop,
+    editStop,
+    removeStop,
+    cycleStatus,
+    reorderStopsInDay,
+  };
 }

@@ -13,6 +13,9 @@ type CompactStopRowProps = {
   showConnector?: boolean;
   onPress?: () => void;
   onStatusPress?: () => void;
+  /** Long-press triggers row drag when provided. */
+  drag?: () => void;
+  isDragging?: boolean;
 };
 
 function statusDot(status: StopStatus) {
@@ -40,6 +43,8 @@ function CompactStopRowBase({
   showConnector = false,
   onPress,
   onStatusPress,
+  drag,
+  isDragging = false,
 }: CompactStopRowProps) {
   const status = (stop.status as StopStatus) ?? 'upcoming';
   const cat = normalizeCategory(stop.category);
@@ -48,20 +53,22 @@ function CompactStopRowBase({
   const dateLabel = formatTime(stop.planned_date);
 
   return (
-    <View style={styles.wrapper}>
+    <View style={[styles.wrapper, isDragging && styles.wrapperDragging]}>
       {/* Timeline column */}
       <View style={styles.timelineCol}>
         <CategoryGlyph category={cat} size={28} elevated />
-        {showConnector && (
+        {showConnector && !isDragging && (
           <View style={[styles.connector, { backgroundColor: dotColor + '40' }]} />
         )}
       </View>
 
       {/* Compact single-line row */}
       <TouchableOpacity
-        style={styles.row}
+        style={[styles.row, isDragging && styles.rowDragging]}
         activeOpacity={0.85}
         onPress={onPress}
+        onLongPress={drag}
+        delayLongPress={drag ? 180 : undefined}
       >
         {/* Name */}
         <Text style={styles.name} numberOfLines={1}>
@@ -97,6 +104,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginBottom: Spacing.xs,
     alignItems: 'flex-start',
+  },
+  wrapperDragging: {
+    opacity: 0.92,
+  },
+  rowDragging: {
+    borderColor: Colors.primary,
+    borderWidth: 1.5,
+    ...Shadows.md,
   },
 
   // Timeline column

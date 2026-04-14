@@ -10,6 +10,12 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import {
+  NestableDraggableFlatList,
+  NestableScrollContainer,
+  type RenderItemParams,
+  type DragEndParams,
+} from 'react-native-draggable-flatlist';
 import { useTrips } from '../../src/hooks/useTrips';
 import { useStops } from '../../src/hooks/useStops';
 import { StopRow } from '../../src/components/StopRow';
@@ -66,6 +72,7 @@ export default function PlanScreen() {
     cycleStatus,
     removeStop,
     editStop,
+    reorderStopsInDay,
   } = useStops(resolvedTripId);
 
   const [addModalOpen, setAddModalOpen] = useState(false);
@@ -116,6 +123,24 @@ export default function PlanScreen() {
       );
     },
     [selectedStop, editStop],
+  );
+
+  const handleDragEnd = useCallback(
+    async (dayKey: string, params: DragEndParams<Stop>) => {
+      // No-op when nothing actually moved.
+      if (params.from === params.to) return;
+      haptics.medium();
+      const dayKeyForHook = dayKey === UNSCHEDULED_KEY ? null : dayKey;
+      try {
+        await reorderStopsInDay(
+          dayKeyForHook,
+          params.data.map((stop) => stop.id),
+        );
+      } catch {
+        haptics.error();
+      }
+    },
+    [reorderStopsInDay],
   );
 
   const loading = tripsLoading || stopsLoading;
@@ -202,8 +227,8 @@ export default function PlanScreen() {
         </View>
       )}
 
-      {/* Stop list */}
-      <ScrollView
+      {/* Stop list — NestableScrollContainer enables drag-to-reorder per day. */}
+      <NestableScrollContainer
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -220,6 +245,47 @@ export default function PlanScreen() {
             const dayStops = grouped[key];
             const isUnscheduled = key === UNSCHEDULED_KEY;
             const dayNumber = sortedKeys.filter((k) => k !== UNSCHEDULED_KEY).indexOf(key) + 1;
+
+            const renderItem = ({
+              item,
+              getIndex,
+              drag,
+              isActive,
+            }: RenderItemParams<Stop>) => {
+              const idx = getIndex() ?? 0;
+              const showConnector = idx < dayStops.length - 1;
+              const onPress = () => {
+                haptics.selection();
+                setSelectedStop(item);
+              };
+              const onStatusPress = () => handleStatusCycle(item);
+              const onDragStart = () => {
+                haptics.selection();
+                drag();
+              };
+
+              return compactView ? (
+                <CompactStopRow
+                  stop={item}
+                  index={idx}
+                  showConnector={showConnector}
+                  onPress={onPress}
+                  onStatusPress={onStatusPress}
+                  drag={dayStops.length > 1 ? onDragStart : undefined}
+                  isDragging={isActive}
+                />
+              ) : (
+                <StopRow
+                  stop={item}
+                  index={idx}
+                  showConnector={showConnector}
+                  onPress={onPress}
+                  onStatusPress={onStatusPress}
+                  drag={dayStops.length > 1 ? onDragStart : undefined}
+                  isDragging={isActive}
+                />
+              );
+            };
 
             return (
               <AnimatedEnter key={key} delay={sectionIdx * 60}>
@@ -252,40 +318,21 @@ export default function PlanScreen() {
                     </Text>
                   </View>
 
-                  {/* Stops */}
-                  {dayStops.map((stop, idx) =>
-                    compactView ? (
-                      <CompactStopRow
-                        key={stop.id}
-                        stop={stop}
-                        index={idx}
-                        showConnector={idx < dayStops.length - 1}
-                        onPress={() => {
-                          haptics.selection();
-                          setSelectedStop(stop);
-                        }}
-                        onStatusPress={() => handleStatusCycle(stop)}
-                      />
-                    ) : (
-                      <StopRow
-                        key={stop.id}
-                        stop={stop}
-                        index={idx}
-                        showConnector={idx < dayStops.length - 1}
-                        onPress={() => {
-                          haptics.selection();
-                          setSelectedStop(stop);
-                        }}
-                        onStatusPress={() => handleStatusCycle(stop)}
-                      />
-                    ),
-                  )}
+                  {/* Draggable stop list for this day */}
+                  <NestableDraggableFlatList<Stop>
+                    data={dayStops}
+                    keyExtractor={(item) => item.id}
+                    renderItem={renderItem}
+                    onDragEnd={(params) => handleDragEnd(key, params)}
+                    activationDistance={12}
+                    scrollEnabled={false}
+                  />
                 </View>
               </AnimatedEnter>
             );
           })
         )}
-      </ScrollView>
+      </NestableScrollContainer>
 
       {/* Add Stop Modal */}
       {resolvedTripId && (

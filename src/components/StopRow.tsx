@@ -16,6 +16,12 @@ type StopRowProps = {
   onPress?: () => void;
   onLongPress?: () => void;
   onStatusPress?: () => void;
+  /**
+   * When provided, the row is draggable. Long-press anywhere on the card
+   * triggers `drag()`. `isDragging` styles the active row while it floats.
+   */
+  drag?: () => void;
+  isDragging?: boolean;
 };
 
 function statusMeta(status: StopStatus) {
@@ -53,6 +59,8 @@ function StopRowBase({
   onPress,
   onLongPress,
   onStatusPress,
+  drag,
+  isDragging = false,
 }: StopRowProps) {
   const status = (stop.status as StopStatus) ?? 'upcoming';
   const sMeta = statusMeta(status);
@@ -60,12 +68,18 @@ function StopRowBase({
   const dotColor = categoryColor(stop.category);
   const isFlight = cat === 'flight';
 
+  // Long-press triggers drag if available, otherwise falls through to whatever
+  // long-press handler the caller passed in.
+  const handleLongPress = drag ?? onLongPress;
+
   return (
-    <View style={styles.wrapper}>
+    <View style={[styles.wrapper, isDragging && styles.wrapperDragging]}>
       {/* Timeline column */}
       <View style={styles.timelineCol}>
         <CategoryGlyph category={cat} size={28} elevated />
-        {showConnector && <View style={[styles.connector, { backgroundColor: dotColor + '40' }]} />}
+        {showConnector && !isDragging && (
+          <View style={[styles.connector, { backgroundColor: dotColor + '40' }]} />
+        )}
       </View>
 
       {/* Card */}
@@ -75,17 +89,19 @@ function StopRowBase({
           <TouchableOpacity
             activeOpacity={0.88}
             onPress={onPress}
-            onLongPress={onLongPress}
+            onLongPress={handleLongPress}
+            delayLongPress={drag ? 180 : undefined}
           >
             <FlightSegmentRow segment={parseFlightSegment(stop)} />
           </TouchableOpacity>
         ) : (
           /* ── Standard stop card ── */
           <TouchableOpacity
-            style={styles.card}
+            style={[styles.card, isDragging && styles.cardDragging]}
             activeOpacity={0.85}
             onPress={onPress}
-            onLongPress={onLongPress}
+            onLongPress={handleLongPress}
+            delayLongPress={drag ? 180 : undefined}
           >
             <View style={styles.cardMain}>
               <Text style={styles.name} numberOfLines={1}>
@@ -156,6 +172,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginBottom: Spacing.md,
     alignItems: 'flex-start',
+  },
+  wrapperDragging: {
+    opacity: 0.92,
+  },
+  cardDragging: {
+    backgroundColor: Colors.surface,
+    ...Shadows.md,
+    borderColor: Colors.primary,
+    borderWidth: 1.5,
   },
 
   // ── Timeline column
