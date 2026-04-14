@@ -18,6 +18,13 @@ export interface Database {
           budget: number | null;
           spent: number | null;
           status: string | null;
+          cover_photo_url: string | null;
+          cover_photo_attribution: string | null;
+          source: string | null;
+          timezone: string | null;
+          country_code: string | null;
+          country_flag: string | null;
+          archived_at: string | null;
           created_at: string | null;
         };
         Insert: {
@@ -28,6 +35,13 @@ export interface Database {
           budget?: number | null;
           spent?: number | null;
           status?: string | null;
+          cover_photo_url?: string | null;
+          cover_photo_attribution?: string | null;
+          source?: string | null;
+          timezone?: string | null;
+          country_code?: string | null;
+          country_flag?: string | null;
+          archived_at?: string | null;
           created_at?: string | null;
         };
         Update: {
@@ -38,6 +52,13 @@ export interface Database {
           budget?: number | null;
           spent?: number | null;
           status?: string | null;
+          cover_photo_url?: string | null;
+          cover_photo_attribution?: string | null;
+          source?: string | null;
+          timezone?: string | null;
+          country_code?: string | null;
+          country_flag?: string | null;
+          archived_at?: string | null;
           created_at?: string | null;
         };
         Relationships: [];
