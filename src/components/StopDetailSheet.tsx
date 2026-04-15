@@ -21,7 +21,7 @@ type StopStatus = 'upcoming' | 'current' | 'done';
 function statusMeta(status: StopStatus) {
   switch (status) {
     case 'current':
-      return { label: 'Now', color: Colors.primary, bg: Colors.primaryLight };
+      return { label: 'Now', color: Colors.primary, bg: Colors.primaryTinted };
     case 'done':
       return { label: 'Done', color: Colors.textSecondary, bg: Colors.border };
     default:

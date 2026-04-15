@@ -113,8 +113,8 @@ export default function ProfileScreen() {
                   haptics.selection();
                   setNotificationsEnabled(val);
                 }}
-                trackColor={{ false: Colors.border, true: Colors.primaryLight }}
-                thumbColor={notificationsEnabled ? Colors.primary : Colors.textTertiary}
+                trackColor={{ false: Colors.borderOnCard, true: Colors.primaryLight }}
+                thumbColor={notificationsEnabled ? Colors.primary : Colors.textOnCardTertiary}
               />
             }
           />
@@ -131,8 +131,8 @@ export default function ProfileScreen() {
                   haptics.selection();
                   setDarkModeEnabled(val);
                 }}
-                trackColor={{ false: Colors.border, true: Colors.primaryLight }}
-                thumbColor={darkModeEnabled ? Colors.primary : Colors.textTertiary}
+                trackColor={{ false: Colors.borderOnCard, true: Colors.primaryLight }}
+                thumbColor={darkModeEnabled ? Colors.primary : Colors.textOnCardTertiary}
               />
             }
           />
@@ -281,14 +281,14 @@ function SettingRow({
         <Ionicons
           name={icon}
           size={22}
-          color={iconColor ?? Colors.textSecondary}
+          color={iconColor ?? Colors.textOnCardSecondary}
         />
         <Text style={[styles.settingLabel, labelColor ? { color: labelColor } : undefined]}>
           {label}
         </Text>
       </View>
       {trailing ?? (
-        <Ionicons name="chevron-forward" size={18} color={Colors.textTertiary} />
+        <Ionicons name="chevron-forward" size={18} color={Colors.textOnCardTertiary} />
       )}
     </View>
   );
@@ -333,7 +333,7 @@ const styles = StyleSheet.create({
   },
   avatarInitials: {
     ...Typography.displaySm,
-    color: Colors.surface,
+    color: '#FFFFFF',
     fontWeight: '800',
   },
   userName: {
@@ -355,10 +355,10 @@ const styles = StyleSheet.create({
     marginTop: Spacing.md,
     marginBottom: Spacing.lg,
     padding: Spacing.lg,
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.card,
     borderRadius: Radius.xl,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: Colors.border,
+    borderColor: Colors.borderOnCard,
     ...Shadows.md,
   },
   statItem: {
@@ -367,34 +367,34 @@ const styles = StyleSheet.create({
   },
   statValue: {
     ...Typography.h2,
-    color: Colors.text,
+    color: Colors.textOnCard,
     fontWeight: '800',
   },
   statLabel: {
     ...Typography.caption,
-    color: Colors.textSecondary,
+    color: Colors.textOnCardSecondary,
   },
   statDivider: {
     width: StyleSheet.hairlineWidth,
     height: 48,
-    backgroundColor: Colors.border,
+    backgroundColor: Colors.borderOnCard,
   },
 
   // Section card
   sectionCard: {
     marginHorizontal: Spacing.lg,
     marginBottom: Spacing.md,
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.card,
     borderRadius: Radius.xl,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: Colors.border,
+    borderColor: Colors.borderOnCard,
     paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.lg,
     ...Shadows.sm,
   },
   sectionTitle: {
     ...Typography.eyebrow,
-    color: Colors.textTertiary,
+    color: Colors.textOnCardTertiary,
     paddingTop: Spacing.sm,
     paddingBottom: Spacing.sm,
   },
@@ -414,12 +414,12 @@ const styles = StyleSheet.create({
   },
   settingLabel: {
     ...Typography.body,
-    color: Colors.text,
+    color: Colors.textOnCard,
     fontWeight: '500',
   },
   rowDivider: {
     height: StyleSheet.hairlineWidth,
-    backgroundColor: Colors.border,
+    backgroundColor: Colors.borderOnCard,
   },
 
   // Footer

@@ -11,3 +11,10 @@ npm-debug.*
 web-build/
 .env
 .env*.local
+
+# macOS
+.DS_Store
+
+# Expo prebuild native output (regenerated via `npx expo prebuild`)
+ios/
+android/

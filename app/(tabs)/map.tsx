@@ -175,7 +175,7 @@ export default function MapScreen() {
           style={styles.fabButton}
           onPress={onFabPress}
         >
-          <Ionicons name="locate" size={22} color={Colors.primary} />
+          <Ionicons name="locate" size={22} color="#FFFFFF" />
         </TouchableOpacity>
       </Animated.View>
 
@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
   },
   mapSurface: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: '#E6EEF5',
+    backgroundColor: Colors.backgroundSecondary,
   },
   mapPlaceholderCenter: {
     flex: 1,
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
   },
   mapPlaceholderText: {
     ...Typography.body,
-    color: Colors.textSecondary,
+    color: Colors.textTertiary,
     textAlign: 'center',
   },
   markerAnchor: {
@@ -240,11 +240,14 @@ const styles = StyleSheet.create({
     right: 0,
   },
   chipStripBg: {
-    backgroundColor: 'rgba(255,255,255,0.85)',
+    backgroundColor: Colors.frostedDark,
     borderBottomLeftRadius: Radius.lg,
     borderBottomRightRadius: Radius.lg,
     marginHorizontal: Spacing.sm,
-    ...Shadows.sm,
+    borderWidth: 1,
+    borderTopWidth: 0,
+    borderColor: Colors.border,
+    ...Shadows.md,
     ...Platform.select({
       ios: {},
       android: { elevation: 3 },
@@ -260,9 +263,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     borderRadius: Radius.full,
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.surfaceElevated,
     borderWidth: 1.5,
-    borderColor: Colors.border,
+    borderColor: Colors.borderStrong,
     maxWidth: 200,
   },
   chipActive: {
@@ -276,7 +279,7 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
   },
   chipTextActive: {
-    color: Colors.surface,
+    color: '#FFFFFF',
   },
   emptyChip: {
     paddingHorizontal: Spacing.md,
@@ -284,7 +287,7 @@ const styles = StyleSheet.create({
   },
   emptyChipText: {
     ...Typography.caption,
-    color: Colors.textSecondary,
+    color: Colors.textTertiary,
   },
 
   // Bottom badge
@@ -295,26 +298,28 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     borderRadius: Radius.full,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    ...Shadows.sm,
+    backgroundColor: Colors.frostedDarkStrong,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    ...Shadows.md,
   },
   bottomBadgeText: {
     ...Typography.caption,
-    color: Colors.surface,
+    color: Colors.text,
     fontWeight: '600',
   },
 
   // FAB
   fab: {
     position: 'absolute',
-    bottom: 40,
+    bottom: 100,
     right: 24,
   },
   fabButton: {
     width: 52,
     height: 52,
     borderRadius: Radius.full,
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
     ...Shadows.md,

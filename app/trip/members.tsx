@@ -70,7 +70,7 @@ export default function MembersScreen() {
         <Text style={styles.sectionTitle}>Members</Text>
         {members.length === 0 ? (
           <View style={styles.empty}>
-            <Ionicons name="people-outline" size={36} color={Colors.textTertiary} />
+            <Ionicons name="people-outline" size={36} color={Colors.textOnCardTertiary} />
             <Text style={styles.emptyText}>No members yet. Invite someone to collaborate!</Text>
           </View>
         ) : (
@@ -110,7 +110,7 @@ export default function MembersScreen() {
           setInviteOpen(true);
         }}
       >
-        <Ionicons name="person-add" size={20} color={Colors.surface} />
+        <Ionicons name="person-add" size={20} color="#FFFFFF" />
         <Text style={styles.fabText}>Invite</Text>
       </TouchableOpacity>
 
@@ -147,11 +147,16 @@ const styles = StyleSheet.create({
   empty: {
     alignItems: 'center',
     paddingVertical: Spacing.xl,
+    paddingHorizontal: Spacing.lg,
+    marginHorizontal: Spacing.lg,
+    backgroundColor: Colors.card,
+    borderRadius: Radius.xl,
     gap: Spacing.sm,
+    ...Shadows.sm,
   },
   emptyText: {
     ...Typography.body,
-    color: Colors.textSecondary,
+    color: Colors.textOnCardSecondary,
     textAlign: 'center',
     maxWidth: 240,
   },
@@ -196,7 +201,7 @@ const styles = StyleSheet.create({
   },
   fab: {
     position: 'absolute',
-    bottom: Spacing.xl,
+    bottom: 100,
     right: Spacing.lg,
     flexDirection: 'row',
     alignItems: 'center',
@@ -209,7 +214,7 @@ const styles = StyleSheet.create({
   },
   fabText: {
     ...Typography.bodyMed,
-    color: Colors.surface,
+    color: '#FFFFFF',
     fontWeight: '700',
   },
 });

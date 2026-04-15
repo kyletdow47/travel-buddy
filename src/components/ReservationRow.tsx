@@ -34,7 +34,7 @@ function statusColor(status: string | null): { bg: string; text: string } {
     case 'cancelled':
       return { bg: `${Colors.error}1A`, text: Colors.error };
     default:
-      return { bg: Colors.surfaceDim, text: Colors.textSecondary };
+      return { bg: Colors.cardSecondary, text: Colors.textOnCardSecondary };
   }
 }
 
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.lg,
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.card,
   },
   iconCircle: {
     width: 40,
@@ -119,11 +119,11 @@ const styles = StyleSheet.create({
   provider: {
     ...Typography.bodyMed,
     fontWeight: '600',
-    color: Colors.text,
+    color: Colors.textOnCard,
   },
   meta: {
     ...Typography.caption,
-    color: Colors.textSecondary,
+    color: Colors.textOnCardSecondary,
     marginTop: 2,
   },
   statusBadge: {
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: StyleSheet.hairlineWidth,
-    backgroundColor: Colors.border,
+    backgroundColor: Colors.borderOnCard,
     marginLeft: Spacing.lg + 40 + Spacing.md,
   },
 });

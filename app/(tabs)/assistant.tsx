@@ -220,7 +220,7 @@ export default function AssistantScreen() {
               style={styles.sendButton}
               disabled={input.trim().length === 0 || resolvedTripId === null}
             >
-              <Ionicons name="arrow-up" size={18} color={Colors.surface} />
+              <Ionicons name="arrow-up" size={18} color="#FFFFFF" />
             </TouchableOpacity>
           </Animated.View>
         </View>
@@ -388,13 +388,14 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
   },
   selectorTextActive: {
-    color: Colors.surface,
+    color: '#FFFFFF',
   },
 
   // List
   listContent: {
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.md,
+    paddingBottom: Spacing.xxxl,
     gap: Spacing.sm,
   },
 
@@ -413,7 +414,7 @@ const styles = StyleSheet.create({
   },
   userText: {
     ...Typography.body,
-    color: Colors.surface,
+    color: '#FFFFFF',
   },
 
   // AI bubble

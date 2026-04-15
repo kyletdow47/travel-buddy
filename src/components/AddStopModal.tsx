@@ -203,7 +203,7 @@ export function AddStopModal({ visible, tripId, onClose, onAdd }: Props) {
             onPress={handleSubmit}
             disabled={submitting}
           >
-            <Ionicons name="add-circle" size={20} color={Colors.surface} />
+            <Ionicons name="add-circle" size={20} color={"#FFFFFF"} />
             <Text style={styles.submitText}>
               {submitting ? 'Adding…' : 'Add Stop'}
             </Text>
@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
   },
   categoryChipActive: {
     borderColor: Colors.primary,
-    backgroundColor: Colors.primaryLight,
+    backgroundColor: 'rgba(79,140,255,0.15)',
   },
   categoryLabel: {
     ...Typography.micro,
@@ -302,7 +302,7 @@ const styles = StyleSheet.create({
   },
   submitText: {
     ...Typography.bodyMed,
-    color: Colors.surface,
+    color: '#FFFFFF',
     fontWeight: '700',
   },
 });

@@ -1,26 +1,32 @@
 import { Tabs } from 'expo-router';
 import { type ComponentProps } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Platform } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { Colors } from '../../src/constants/theme';
+import { Colors, Radius } from '../../src/constants/theme';
 
 type IoniconsName = ComponentProps<typeof Ionicons>['name'];
 
+const TAB_ICON_SIZE = 22;
+
 function TabIcon({
   name,
+  filledName,
   color,
-  size,
   focused,
 }: {
   name: IoniconsName;
+  filledName: IoniconsName;
   color: string;
-  size: number;
   focused: boolean;
 }) {
   return (
     <View style={styles.tabIconWrap}>
-      <Ionicons name={name} size={size} color={color} />
-      {focused && <View style={styles.activeDot} />}
+      {focused && <View style={styles.activeGlow} />}
+      <Ionicons
+        name={focused ? filledName : name}
+        size={TAB_ICON_SIZE}
+        color={color}
+      />
     </View>
   );
 }
@@ -30,26 +36,22 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: Colors.textTertiary,
+        tabBarInactiveTintColor: 'rgba(255,255,255,0.35)',
         tabBarStyle: {
-          backgroundColor: Colors.surface,
+          backgroundColor: Colors.tabBar,
           borderTopWidth: 0,
-          height: 60,
-          paddingBottom: 8,
-          paddingTop: 4,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: -2 },
-          shadowOpacity: 0.08,
-          shadowRadius: 12,
-          elevation: 8,
+          height: Platform.OS === 'ios' ? 88 : 64,
+          paddingBottom: Platform.OS === 'ios' ? 28 : 8,
+          paddingTop: 8,
         },
         tabBarLabelStyle: {
           fontSize: 10,
           fontWeight: '600',
-          letterSpacing: 0.2,
+          letterSpacing: 0.3,
+          marginTop: 2,
         },
         headerStyle: {
-          backgroundColor: Colors.surface,
+          backgroundColor: Colors.background,
         },
         headerShadowVisible: false,
         headerTitleStyle: {
@@ -64,8 +66,8 @@ export default function TabLayout() {
         options={{
           title: 'Home',
           headerShown: false,
-          tabBarIcon: ({ color, size, focused }) => (
-            <TabIcon name="home-outline" color={color} size={size} focused={focused} />
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon name="home-outline" filledName="home" color={color} focused={focused} />
           ),
         }}
       />
@@ -73,8 +75,8 @@ export default function TabLayout() {
         name="plan"
         options={{
           title: 'Plan',
-          tabBarIcon: ({ color, size, focused }) => (
-            <TabIcon name="calendar-outline" color={color} size={size} focused={focused} />
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon name="calendar-outline" filledName="calendar" color={color} focused={focused} />
           ),
         }}
       />
@@ -83,18 +85,18 @@ export default function TabLayout() {
         options={{
           title: 'Map',
           headerShown: false,
-          tabBarIcon: ({ color, size, focused }) => (
-            <TabIcon name="map-outline" color={color} size={size} focused={focused} />
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon name="map-outline" filledName="map" color={color} focused={focused} />
           ),
         }}
       />
       <Tabs.Screen
         name="assistant"
         options={{
-          title: 'Assistant',
+          title: 'AI',
           headerShown: false,
-          tabBarIcon: ({ color, size, focused }) => (
-            <TabIcon name="chatbubbles-outline" color={color} size={size} focused={focused} />
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon name="chatbubbles-outline" filledName="chatbubbles" color={color} focused={focused} />
           ),
         }}
       />
@@ -102,8 +104,8 @@ export default function TabLayout() {
         name="packing"
         options={{
           title: 'Packing',
-          tabBarIcon: ({ color, size, focused }) => (
-            <TabIcon name="cube-outline" color={color} size={size} focused={focused} />
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon name="cube-outline" filledName="cube" color={color} focused={focused} />
           ),
         }}
       />
@@ -111,8 +113,8 @@ export default function TabLayout() {
         name="receipts"
         options={{
           title: 'Receipts',
-          tabBarIcon: ({ color, size, focused }) => (
-            <TabIcon name="receipt-outline" color={color} size={size} focused={focused} />
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon name="receipt-outline" filledName="receipt" color={color} focused={focused} />
           ),
         }}
       />
@@ -120,8 +122,8 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: 'Profile',
-          tabBarIcon: ({ color, size, focused }) => (
-            <TabIcon name="person-outline" color={color} size={size} focused={focused} />
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon name="person-outline" filledName="person" color={color} focused={focused} />
           ),
         }}
       />
@@ -133,12 +135,12 @@ const styles = StyleSheet.create({
   tabIconWrap: {
     alignItems: 'center',
     justifyContent: 'center',
+    width: 44,
+    height: 28,
   },
-  activeDot: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: Colors.primary,
-    marginTop: 2,
+  activeGlow: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(79,140,255,0.12)',
+    borderRadius: Radius.md,
   },
 });

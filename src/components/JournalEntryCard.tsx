@@ -96,10 +96,10 @@ export const JournalEntryCard = memo(JournalEntryCardBase);
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.card,
     borderRadius: Radius.xl,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: Colors.border,
+    borderColor: Colors.borderOnCard,
     padding: Spacing.md,
     marginBottom: Spacing.md,
     ...Shadows.sm,
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: Radius.md,
-    backgroundColor: Colors.surfaceDim,
+    backgroundColor: Colors.cardSecondary,
   },
 
   // Mood placeholder (when no photos)
@@ -141,19 +141,19 @@ const styles = StyleSheet.create({
   title: {
     ...Typography.bodyMed,
     fontWeight: '700',
-    color: Colors.text,
+    color: Colors.textOnCard,
     flex: 1,
     marginRight: Spacing.sm,
   },
   date: {
     ...Typography.caption,
-    color: Colors.textTertiary,
+    color: Colors.textOnCardTertiary,
   },
 
   // Body
   body: {
     ...Typography.body,
-    color: Colors.textSecondary,
+    color: Colors.textOnCardSecondary,
     marginBottom: Spacing.sm,
   },
 

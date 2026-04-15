@@ -9,21 +9,20 @@ import {
 type Props = {
   children: React.ReactNode;
   style?: StyleProp<ViewStyle>;
-  duration?: number;
   translateYFrom?: number;
   delay?: number;
 };
 
-// Fade + slide-up entrance. Skipped entirely when reduce-motion is on.
+// Spring-based fade + slide-up entrance. Skipped when reduce-motion is on.
 export function AnimatedEnter({
   children,
   style,
-  duration = 300,
-  translateYFrom = 12,
+  translateYFrom = 16,
   delay = 0,
 }: Props) {
   const opacity = useRef(new Animated.Value(0)).current;
   const translateY = useRef(new Animated.Value(translateYFrom)).current;
+  const scale = useRef(new Animated.Value(0.97)).current;
   const [reduceMotion, setReduceMotion] = useState(false);
 
   useEffect(() => {
@@ -35,8 +34,24 @@ export function AnimatedEnter({
   useEffect(() => {
     if (reduceMotion) return;
     const anim = Animated.parallel([
-      Animated.timing(opacity, { toValue: 1, duration, useNativeDriver: true }),
-      Animated.timing(translateY, { toValue: 0, duration, useNativeDriver: true }),
+      Animated.spring(opacity, {
+        toValue: 1,
+        damping: 20,
+        stiffness: 200,
+        useNativeDriver: true,
+      }),
+      Animated.spring(translateY, {
+        toValue: 0,
+        damping: 18,
+        stiffness: 180,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scale, {
+        toValue: 1,
+        damping: 18,
+        stiffness: 180,
+        useNativeDriver: true,
+      }),
     ]);
     if (delay > 0) {
       const timer = setTimeout(() => anim.start(), delay);
@@ -44,7 +59,7 @@ export function AnimatedEnter({
     }
     anim.start();
     return undefined;
-  }, [opacity, translateY, duration, delay, reduceMotion]);
+  }, [opacity, translateY, scale, delay, reduceMotion]);
 
   if (reduceMotion) {
     return <Animated.View style={style}>{children}</Animated.View>;
@@ -52,7 +67,7 @@ export function AnimatedEnter({
 
   return (
     <Animated.View
-      style={[{ opacity, transform: [{ translateY }] }, style]}
+      style={[{ opacity, transform: [{ translateY }, { scale }] }, style]}
     >
       {children}
     </Animated.View>

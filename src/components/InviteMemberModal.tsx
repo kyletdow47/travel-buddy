@@ -142,7 +142,7 @@ export function InviteMemberModal({ visible, onClose, onInvite }: Props) {
             onPress={handleSubmit}
             disabled={submitting}
           >
-            <Ionicons name="send" size={18} color={Colors.surface} />
+            <Ionicons name="send" size={18} color={"#FFFFFF"} />
             <Text style={styles.submitText}>
               {submitting ? 'Sending...' : 'Send Invite'}
             </Text>
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
   },
   roleChipActive: {
     borderColor: Colors.primary,
-    backgroundColor: Colors.primaryLight,
+    backgroundColor: Colors.primaryTinted,
   },
   roleLabel: {
     ...Typography.micro,
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
   },
   submitText: {
     ...Typography.bodyMed,
-    color: Colors.surface,
+    color: '#FFFFFF',
     fontWeight: '700',
   },
 });

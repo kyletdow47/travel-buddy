@@ -195,7 +195,7 @@ export function EditReceiptModal({ visible, receipt, onClose, onSave }: Props) {
             onPress={handleSubmit}
             disabled={submitting}
           >
-            <Ionicons name="checkmark-circle" size={20} color={Colors.surface} />
+            <Ionicons name="checkmark-circle" size={20} color={"#FFFFFF"} />
             <Text style={styles.submitText}>
               {submitting ? 'Saving…' : 'Save Changes'}
             </Text>
@@ -301,7 +301,7 @@ const styles = StyleSheet.create({
   },
   submitText: {
     ...Typography.bodyMed,
-    color: Colors.surface,
+    color: '#FFFFFF',
     fontWeight: '700',
   },
 });

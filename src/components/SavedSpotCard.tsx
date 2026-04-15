@@ -81,7 +81,7 @@ function SavedSpotCardBase({ spot, onImport, onDelete }: Props) {
             activeOpacity={0.85}
             onPress={onImport}
           >
-            <Ionicons name="add-circle" size={14} color={Colors.surface} />
+            <Ionicons name="add-circle" size={14} color="#FFFFFF" />
             <Text style={styles.importText}>Add to Trip</Text>
           </TouchableOpacity>
 
@@ -89,7 +89,7 @@ function SavedSpotCardBase({ spot, onImport, onDelete }: Props) {
             onPress={onDelete}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <Ionicons name="trash-outline" size={16} color={Colors.textTertiary} />
+            <Ionicons name="trash-outline" size={16} color={Colors.textOnCardTertiary} />
           </TouchableOpacity>
         </View>
       </View>
@@ -102,7 +102,7 @@ export const SavedSpotCard = memo(SavedSpotCardBase);
 const styles = StyleSheet.create({
   card: {
     flex: 1,
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.card,
     borderRadius: Radius.lg,
     overflow: 'hidden',
     ...Shadows.sm,
@@ -135,11 +135,11 @@ const styles = StyleSheet.create({
   },
   name: {
     ...Typography.bodyMed,
-    color: Colors.text,
+    color: Colors.textOnCard,
   },
   location: {
     ...Typography.caption,
-    color: Colors.textSecondary,
+    color: Colors.textOnCardSecondary,
     marginTop: 2,
   },
   actions: {
@@ -159,6 +159,6 @@ const styles = StyleSheet.create({
   },
   importText: {
     ...Typography.micro,
-    color: Colors.surface,
+    color: '#FFFFFF',
   },
 });

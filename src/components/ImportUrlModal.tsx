@@ -149,7 +149,7 @@ export function ImportUrlModal({ visible, onClose, onImport }: Props) {
           onPress={handleSubmit}
           disabled={submitting}
         >
-          <Ionicons name="download" size={20} color={Colors.surface} />
+          <Ionicons name="download" size={20} color={"#FFFFFF"} />
           <Text style={styles.submitText}>
             {submitting ? 'Importing...' : 'Import'}
           </Text>
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
   },
   submitText: {
     ...Typography.bodyMed,
-    color: Colors.surface,
+    color: '#FFFFFF',
     fontWeight: '700',
   },
 });

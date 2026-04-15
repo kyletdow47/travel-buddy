@@ -29,12 +29,12 @@ export const SyncStatusBanner = memo(function SyncStatusBanner({
     <View style={[styles.banner, lastError ? styles.bannerError : styles.bannerPending]}>
       <View style={styles.left}>
         {syncing ? (
-          <ActivityIndicator size="small" color={Colors.surface} />
+          <ActivityIndicator size="small" color={"#FFFFFF"} />
         ) : (
           <Ionicons
             name={lastError ? 'warning-outline' : 'cloud-upload-outline'}
             size={18}
-            color={Colors.surface}
+            color={"#FFFFFF"}
           />
         )}
         <Text style={styles.text} numberOfLines={1}>
@@ -54,7 +54,7 @@ export const SyncStatusBanner = memo(function SyncStatusBanner({
             onSync();
           }}
         >
-          <Ionicons name="sync" size={16} color={Colors.surface} />
+          <Ionicons name="sync" size={16} color={"#FFFFFF"} />
           <Text style={styles.syncText}>Sync</Text>
         </TouchableOpacity>
       )}
@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
   },
   text: {
     ...Typography.caption,
-    color: Colors.surface,
+    color: '#FFFFFF',
     fontWeight: '600',
   },
   syncBtn: {
@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
   },
   syncText: {
     ...Typography.micro,
-    color: Colors.surface,
+    color: '#FFFFFF',
     fontWeight: '700',
   },
 });

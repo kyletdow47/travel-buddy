@@ -72,7 +72,7 @@ export function GradientScreen({
       <Wrapper style={[styles.fill, contentStyle]}>{children}</Wrapper>
     </LinearGradient>
   ) : (
-    <View style={[styles.fill, { backgroundColor: stops[stops.length - 1] ?? Colors.surfaceDark }, style]}>
+    <View style={[styles.fill, { backgroundColor: stops[stops.length - 1] ?? Colors.background }, style]}>
       <Wrapper style={[styles.fill, contentStyle]}>{children}</Wrapper>
     </View>
   );

@@ -236,7 +236,7 @@ export function AddReservationModal({ visible, tripId, onClose, onAdd }: Props) 
             onPress={handleSubmit}
             disabled={submitting}
           >
-            <Ionicons name="add-circle" size={20} color={Colors.surface} />
+            <Ionicons name="add-circle" size={20} color={"#FFFFFF"} />
             <Text style={styles.submitText}>
               {submitting ? 'Adding...' : 'Add Reservation'}
             </Text>
@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
   },
   typeChipActive: {
     borderColor: Colors.primary,
-    backgroundColor: Colors.primaryLight,
+    backgroundColor: Colors.primaryTinted,
   },
   typeIcon: {
     width: 36,
@@ -342,7 +342,7 @@ const styles = StyleSheet.create({
   },
   submitText: {
     ...Typography.bodyMed,
-    color: Colors.surface,
+    color: '#FFFFFF',
     fontWeight: '700',
   },
 });

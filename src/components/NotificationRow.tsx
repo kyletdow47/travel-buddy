@@ -93,10 +93,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.lg,
-    backgroundColor: Colors.surface,
+    marginHorizontal: Spacing.lg,
+    marginTop: Spacing.sm,
+    backgroundColor: Colors.card,
+    borderRadius: Radius.lg,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: Colors.borderOnCard,
   },
   rowUnread: {
-    backgroundColor: Colors.primaryLight + '30',
+    backgroundColor: Colors.card,
+    borderColor: Colors.primary,
+    borderWidth: 1,
   },
   iconCircle: {
     width: 40,
@@ -111,19 +118,19 @@ const styles = StyleSheet.create({
   },
   title: {
     ...Typography.bodyMed,
-    color: Colors.text,
+    color: Colors.textOnCard,
   },
   titleUnread: {
     fontWeight: '700',
   },
   body: {
     ...Typography.caption,
-    color: Colors.textSecondary,
+    color: Colors.textOnCardSecondary,
     marginTop: 2,
   },
   time: {
     ...Typography.caption,
-    color: Colors.textTertiary,
+    color: Colors.textOnCardTertiary,
     marginTop: 2,
   },
   unreadDot: {
@@ -133,8 +140,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.info,
   },
   separator: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: Colors.border,
-    marginLeft: Spacing.lg + 40 + Spacing.md,
+    height: 0,
   },
 });

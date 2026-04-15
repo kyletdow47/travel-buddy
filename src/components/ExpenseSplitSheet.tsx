@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
     color: Colors.textOnDarkSecondary,
   },
   tabTextActive: {
-    color: Colors.surface,
+    color: '#FFFFFF',
   },
   memberList: {
     gap: Spacing.md,
@@ -259,6 +259,6 @@ const styles = StyleSheet.create({
   applyButtonText: {
     ...Typography.bodyMed,
     fontWeight: '700',
-    color: Colors.surface,
+    color: '#FFFFFF',
   },
 });

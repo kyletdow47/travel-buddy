@@ -72,7 +72,7 @@ export function HeroPhotoHeader({
   actionIcon,
   onActionPress,
   children,
-  fallbackColor = Colors.surfaceDark,
+  fallbackColor = Colors.background,
   style,
 }: Props) {
   const scrimColors = useMemo(
@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
   wrap: {
     width: '100%',
     overflow: 'hidden',
-    backgroundColor: Colors.surfaceDark,
+    backgroundColor: Colors.background,
   },
   hero: {
     width: '100%',

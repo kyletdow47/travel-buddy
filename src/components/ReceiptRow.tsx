@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.lg,
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.card,
   },
   iconCircle: {
     width: 40,
@@ -96,11 +96,11 @@ const styles = StyleSheet.create({
   merchant: {
     ...Typography.bodyMed,
     fontWeight: '600',
-    color: Colors.text,
+    color: Colors.textOnCard,
   },
   meta: {
     ...Typography.caption,
-    color: Colors.textSecondary,
+    color: Colors.textOnCardSecondary,
     marginTop: 2,
   },
   right: {
@@ -109,11 +109,11 @@ const styles = StyleSheet.create({
   amount: {
     fontSize: 16,
     fontWeight: '700',
-    color: Colors.text,
+    color: Colors.textOnCard,
   },
   separator: {
     height: StyleSheet.hairlineWidth,
-    backgroundColor: Colors.border,
+    backgroundColor: Colors.borderOnCard,
     marginLeft: Spacing.lg + 40 + Spacing.md,
   },
 });

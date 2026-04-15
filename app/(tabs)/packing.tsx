@@ -190,7 +190,7 @@ export default function PackingScreen() {
           setAddModalOpen(true);
         }}
       >
-        <Ionicons name="add" size={26} color={Colors.surface} />
+        <Ionicons name="add" size={26} color="#FFFFFF" />
       </TouchableOpacity>
 
       {/* Add Packing Item Modal */}
@@ -350,14 +350,14 @@ function Empty({ onAdd }: { onAdd: () => void }) {
   return (
     <View style={styles.empty}>
       <View style={styles.emptyIcon}>
-        <Ionicons name="cube-outline" size={40} color={Colors.textTertiary} />
+        <Ionicons name="cube-outline" size={40} color={Colors.textOnCardTertiary} />
       </View>
       <Text style={styles.emptyTitle}>No packing items yet</Text>
       <Text style={styles.emptySubtitle}>
         Start adding items to your packing list so nothing gets left behind.
       </Text>
       <TouchableOpacity style={styles.ctaButton} activeOpacity={0.85} onPress={onAdd}>
-        <Ionicons name="add" size={18} color={Colors.surface} />
+        <Ionicons name="add" size={18} color="#FFFFFF" />
         <Text style={styles.ctaButtonText}>Add First Item</Text>
       </TouchableOpacity>
     </View>
@@ -398,7 +398,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingVertical: 7,
     borderRadius: Radius.full,
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.surfaceElevated,
     borderWidth: 1.5,
     borderColor: Colors.border,
     maxWidth: 200,
@@ -413,18 +413,18 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
   },
   selectorTextActive: {
-    color: Colors.surface,
+    color: '#FFFFFF',
   },
 
-  // Stats card
+  // Stats card — white card on dark background
   statsCard: {
     marginHorizontal: Spacing.lg,
     marginBottom: Spacing.md,
     padding: Spacing.lg,
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.card,
     borderRadius: Radius.xl,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: Colors.border,
+    borderColor: Colors.borderOnCard,
     ...Shadows.md,
   },
   statsHeaderRow: {
@@ -434,7 +434,7 @@ const styles = StyleSheet.create({
   },
   statsLabel: {
     ...Typography.caption,
-    color: Colors.textSecondary,
+    color: Colors.textOnCardSecondary,
     marginBottom: 2,
   },
   statsAmount: {
@@ -459,13 +459,13 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: StyleSheet.hairlineWidth,
-    backgroundColor: Colors.border,
+    backgroundColor: Colors.borderOnCard,
     marginVertical: Spacing.md,
   },
   progressTrack: {
     height: 8,
     borderRadius: Radius.xs,
-    backgroundColor: Colors.border,
+    backgroundColor: Colors.cardSecondary,
     overflow: 'hidden',
   },
   progressFill: {
@@ -474,11 +474,11 @@ const styles = StyleSheet.create({
   },
   progressHint: {
     ...Typography.caption,
-    color: Colors.textSecondary,
+    color: Colors.textOnCardSecondary,
     marginTop: Spacing.sm,
   },
 
-  // Section headers
+  // Section headers — white text on dark navy background
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -514,17 +514,17 @@ const styles = StyleSheet.create({
     marginBottom: 0,
   },
 
-  // Empty state
+  // Empty state — white card on dark background
   empty: {
     alignItems: 'center',
     paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.xxxl,
     marginHorizontal: Spacing.lg,
     marginTop: Spacing.md,
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.card,
     borderRadius: Radius.xl,
     borderWidth: 1.5,
-    borderColor: Colors.border,
+    borderColor: Colors.borderOnCard,
     borderStyle: 'dashed',
     gap: Spacing.sm,
   },
@@ -532,19 +532,19 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: Radius.full,
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.cardSecondary,
     alignItems: 'center',
     justifyContent: 'center',
     ...Shadows.sm,
   },
   emptyTitle: {
     ...Typography.h3,
-    color: Colors.text,
+    color: Colors.textOnCard,
     marginTop: Spacing.xs,
   },
   emptySubtitle: {
     ...Typography.body,
-    color: Colors.textSecondary,
+    color: Colors.textOnCardSecondary,
     textAlign: 'center',
   },
   ctaButton: {
@@ -560,11 +560,11 @@ const styles = StyleSheet.create({
   },
   ctaButtonText: {
     ...Typography.bodyMed,
-    color: Colors.surface,
+    color: '#FFFFFF',
     fontWeight: '700',
   },
 
-  // Full empty (no trips)
+  // Full empty (no trips) — white card overlay on dark background
   fullEmpty: {
     flex: 1,
     alignItems: 'center',
@@ -574,7 +574,7 @@ const styles = StyleSheet.create({
   },
   fullEmptyTitle: {
     ...Typography.h2,
-    color: Colors.text,
+    color: '#FFFFFF',
   },
   fullEmptySubtitle: {
     ...Typography.body,
@@ -582,10 +582,10 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
-  // FAB
+  // FAB — primary action
   fab: {
     position: 'absolute',
-    bottom: 32,
+    bottom: 100,
     right: 24,
     width: 56,
     height: 56,

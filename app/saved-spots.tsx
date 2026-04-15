@@ -159,7 +159,7 @@ export default function SavedSpotsScreen() {
           style={styles.fabButton}
           onPress={onFabPress}
         >
-          <Ionicons name="add" size={24} color={Colors.surface} />
+          <Ionicons name="add" size={24} color="#FFFFFF" />
         </TouchableOpacity>
       </Animated.View>
 
@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
   },
   chipTextActive: {
-    color: Colors.surface,
+    color: '#FFFFFF',
   },
 
   // Scroll

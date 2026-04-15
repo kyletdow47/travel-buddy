@@ -21,7 +21,7 @@ function roleBadgeStyle(role: string) {
       return { color: Colors.info, bg: `${Colors.info}18` };
     case 'viewer':
     default:
-      return { color: Colors.textSecondary, bg: Colors.surfaceDim };
+      return { color: Colors.textOnCardSecondary, bg: Colors.cardSecondary };
   }
 }
 
@@ -57,13 +57,13 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.card,
     borderRadius: Radius.lg,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.md,
     gap: Spacing.md,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: Colors.border,
+    borderColor: Colors.borderOnCard,
   },
   avatar: {
     width: 40,
@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
   },
   initials: {
     ...Typography.bodyMed,
-    color: Colors.surface,
+    color: '#FFFFFF',
     fontWeight: '700',
     fontSize: 14,
   },
@@ -85,12 +85,12 @@ const styles = StyleSheet.create({
   },
   name: {
     ...Typography.bodyMed,
-    color: Colors.text,
+    color: Colors.textOnCard,
     fontWeight: '600',
   },
   email: {
     ...Typography.caption,
-    color: Colors.textSecondary,
+    color: Colors.textOnCardSecondary,
   },
   roleBadge: {
     paddingHorizontal: Spacing.sm,

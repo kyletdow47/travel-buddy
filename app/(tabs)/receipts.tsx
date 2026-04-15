@@ -195,7 +195,7 @@ export default function ReceiptsScreen() {
           setAddModalOpen(true);
         }}
       >
-        <Ionicons name="add" size={26} color={Colors.surface} />
+        <Ionicons name="add" size={26} color="#FFFFFF" />
       </TouchableOpacity>
 
       {/* Add Receipt Modal */}
@@ -426,14 +426,14 @@ function Empty({ hasReceipts, onAdd }: { hasReceipts: boolean; onAdd: () => void
   return (
     <View style={styles.empty}>
       <View style={styles.emptyIcon}>
-        <Ionicons name="receipt-outline" size={40} color={Colors.textTertiary} />
+        <Ionicons name="receipt-outline" size={40} color={Colors.textOnCardTertiary} />
       </View>
       <Text style={styles.emptyTitle}>No receipts yet</Text>
       <Text style={styles.emptySubtitle}>
         Track your spending by adding receipts as you travel.
       </Text>
       <TouchableOpacity style={styles.ctaButton} activeOpacity={0.85} onPress={onAdd}>
-        <Ionicons name="add" size={18} color={Colors.surface} />
+        <Ionicons name="add" size={18} color="#FFFFFF" />
         <Text style={styles.ctaButtonText}>Add First Receipt</Text>
       </TouchableOpacity>
     </View>
@@ -461,6 +461,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingBottom: 100,
+    paddingHorizontal: 0,
   },
 
   // Trip selector
@@ -474,7 +475,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingVertical: 7,
     borderRadius: Radius.full,
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.surfaceElevated,
     borderWidth: 1.5,
     borderColor: Colors.border,
     maxWidth: 200,
@@ -489,18 +490,18 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
   },
   selectorTextActive: {
-    color: Colors.surface,
+    color: '#FFFFFF',
   },
 
-  // Stats card
+  // Stats card — white overlay on dark background (Tripsy expense summary)
   statsCard: {
     marginHorizontal: Spacing.lg,
     marginBottom: Spacing.md,
     padding: Spacing.lg,
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.card,
     borderRadius: Radius.xl,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: Colors.border,
+    borderColor: Colors.borderOnCard,
     ...Shadows.md,
   },
   statsHeaderRow: {
@@ -510,13 +511,13 @@ const styles = StyleSheet.create({
   },
   statsLabel: {
     ...Typography.caption,
-    color: Colors.textSecondary,
+    color: Colors.textOnCardSecondary,
     marginBottom: 2,
   },
   statsAmount: {
     fontSize: 28,
     fontWeight: '800',
-    color: Colors.primary,
+    color: Colors.textOnCard,
     lineHeight: 32,
   },
   receiptCountBadge: {
@@ -535,7 +536,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: StyleSheet.hairlineWidth,
-    backgroundColor: Colors.border,
+    backgroundColor: Colors.borderOnCard,
     marginVertical: Spacing.md,
   },
   remaining: {
@@ -551,22 +552,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.sm,
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.cardSecondary,
     borderLeftWidth: 4,
     borderRadius: Radius.sm,
     paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.md,
-    borderColor: Colors.border,
+    borderColor: Colors.borderOnCard,
     borderWidth: 1,
   },
   breakdownCategory: {
     ...Typography.micro,
-    color: Colors.textSecondary,
+    color: Colors.textOnCardSecondary,
   },
   breakdownAmount: {
     ...Typography.bodyMed,
     fontWeight: '700',
-    color: Colors.text,
+    color: Colors.textOnCard,
   },
 
   // Filter chips
@@ -579,7 +580,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.xs,
     borderRadius: Radius.full,
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.surfaceElevated,
     borderWidth: 1.5,
     borderColor: Colors.border,
   },
@@ -593,7 +594,7 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
   },
   filterChipTextActive: {
-    color: Colors.surface,
+    color: '#FFFFFF',
   },
 
   // Skeleton
@@ -604,17 +605,17 @@ const styles = StyleSheet.create({
     marginBottom: 0,
   },
 
-  // Empty state
+  // Empty state — white card on dark background
   empty: {
     alignItems: 'center',
     paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.xxxl,
     marginHorizontal: Spacing.lg,
     marginTop: Spacing.md,
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.card,
     borderRadius: Radius.xl,
     borderWidth: 1.5,
-    borderColor: Colors.border,
+    borderColor: Colors.borderOnCard,
     borderStyle: 'dashed',
     gap: Spacing.sm,
   },
@@ -622,19 +623,19 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: Radius.full,
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.cardSecondary,
     alignItems: 'center',
     justifyContent: 'center',
     ...Shadows.sm,
   },
   emptyTitle: {
     ...Typography.h3,
-    color: Colors.text,
+    color: Colors.textOnCard,
     marginTop: Spacing.xs,
   },
   emptySubtitle: {
     ...Typography.body,
-    color: Colors.textSecondary,
+    color: Colors.textOnCardSecondary,
     textAlign: 'center',
   },
   emptyInline: {
@@ -658,7 +659,7 @@ const styles = StyleSheet.create({
   },
   ctaButtonText: {
     ...Typography.bodyMed,
-    color: Colors.surface,
+    color: '#FFFFFF',
     fontWeight: '700',
   },
 
@@ -676,14 +677,14 @@ const styles = StyleSheet.create({
   },
   fullEmptySubtitle: {
     ...Typography.body,
-    color: Colors.textSecondary,
+    color: Colors.textTertiary,
     textAlign: 'center',
   },
 
   // FAB
   fab: {
     position: 'absolute',
-    bottom: 32,
+    bottom: 100,
     right: 24,
     width: 56,
     height: 56,

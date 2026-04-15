@@ -12,7 +12,7 @@ export default function RootLayout() {
           contentStyle: { backgroundColor: Colors.background },
         }}
       />
-      <StatusBar style="dark" />
+      <StatusBar style="light" />
     </SafeAreaProvider>
   );
 }

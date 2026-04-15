@@ -75,7 +75,7 @@ export default function JournalScreen() {
       {entries.length === 0 ? (
         /* Empty state */
         <View style={styles.emptyState}>
-          <Ionicons name="book-outline" size={64} color={Colors.textTertiary} />
+          <Ionicons name="book-outline" size={64} color={Colors.textOnCardTertiary} />
           <Text style={styles.emptyTitle}>Start documenting your journey</Text>
           <Text style={styles.emptyText}>
             Capture your thoughts, moods, and memories from each day of your trip.
@@ -111,7 +111,7 @@ export default function JournalScreen() {
         activeOpacity={0.85}
         onPress={handleFab}
       >
-        <Ionicons name="add" size={28} color={Colors.surface} />
+        <Ionicons name="add" size={28} color="#FFFFFF" />
       </TouchableOpacity>
 
       {/* Add entry modal */}
@@ -176,27 +176,32 @@ const styles = StyleSheet.create({
 
   // Empty state
   emptyState: {
-    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: Spacing.xxl,
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: Spacing.xxxl,
+    marginHorizontal: Spacing.lg,
+    marginTop: Spacing.xxl,
+    backgroundColor: Colors.card,
+    borderRadius: Radius.xl,
     gap: Spacing.md,
+    ...Shadows.sm,
   },
   emptyTitle: {
     ...Typography.h2,
-    color: Colors.text,
+    color: Colors.textOnCard,
     textAlign: 'center',
   },
   emptyText: {
     ...Typography.body,
-    color: Colors.textSecondary,
+    color: Colors.textOnCardSecondary,
     textAlign: 'center',
   },
 
   // FAB
   fab: {
     position: 'absolute',
-    bottom: 32,
+    bottom: 100,
     right: Spacing.lg,
     width: 56,
     height: 56,

@@ -86,6 +86,6 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
   },
   codeActive: {
-    color: Colors.surface,
+    color: '#FFFFFF',
   },
 });

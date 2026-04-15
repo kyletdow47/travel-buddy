@@ -53,7 +53,7 @@ export function PackingItemRow({ item, onToggle, onLongPress }: Props) {
         ]}
       >
         {item.packed && (
-          <Ionicons name="checkmark" size={14} color={Colors.surface} />
+          <Ionicons name="checkmark" size={14} color="#FFFFFF" />
         )}
       </View>
 
@@ -85,7 +85,7 @@ export function PackingItemRow({ item, onToggle, onLongPress }: Props) {
               <Ionicons
                 name="person-outline"
                 size={10}
-                color={Colors.textSecondary}
+                color={Colors.textOnCardSecondary}
               />
               <Text style={styles.assignedText}>{item.assigned_to}</Text>
             </View>
@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm + 2,
     paddingHorizontal: Spacing.lg,
     gap: Spacing.md,
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.card,
   },
 
   checkbox: {
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
     height: 24,
     borderRadius: Radius.sm,
     borderWidth: 2,
-    borderColor: Colors.border,
+    borderColor: Colors.borderOnCard,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -130,11 +130,11 @@ const styles = StyleSheet.create({
   },
   name: {
     ...Typography.body,
-    color: Colors.text,
+    color: Colors.textOnCard,
   },
   namePacked: {
     textDecorationLine: 'line-through',
-    color: Colors.textTertiary,
+    color: Colors.textOnCardTertiary,
   },
 
   meta: {
@@ -159,16 +159,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.sm,
     paddingVertical: 2,
     borderRadius: Radius.full,
-    backgroundColor: Colors.surfaceDim,
+    backgroundColor: Colors.cardSecondary,
   },
   assignedText: {
     ...Typography.micro,
-    color: Colors.textSecondary,
+    color: Colors.textOnCardSecondary,
   },
 
   separator: {
     height: StyleSheet.hairlineWidth,
-    backgroundColor: Colors.border,
+    backgroundColor: Colors.borderOnCard,
     marginLeft: Spacing.lg + 24 + Spacing.md,
   },
 });

@@ -102,7 +102,7 @@ function EmptyState() {
   return (
     <View style={styles.empty}>
       <View style={styles.emptyIcon}>
-        <Ionicons name="notifications-outline" size={40} color={Colors.textTertiary} />
+        <Ionicons name="notifications-outline" size={40} color={Colors.textOnCardTertiary} />
       </View>
       <Text style={styles.emptyTitle}>No notifications yet</Text>
       <Text style={styles.emptySubtitle}>
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.md,
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.background,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: Colors.border,
   },
@@ -154,10 +154,10 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.xxxl,
     marginHorizontal: Spacing.lg,
     marginTop: Spacing.xxl,
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.card,
     borderRadius: Radius.xl,
     borderWidth: 1.5,
-    borderColor: Colors.border,
+    borderColor: Colors.borderOnCard,
     borderStyle: 'dashed',
     gap: Spacing.sm,
   },
@@ -165,19 +165,19 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: Radius.full,
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.cardSecondary,
     alignItems: 'center',
     justifyContent: 'center',
     ...Shadows.sm,
   },
   emptyTitle: {
     ...Typography.h3,
-    color: Colors.text,
+    color: Colors.textOnCard,
     marginTop: Spacing.xs,
   },
   emptySubtitle: {
     ...Typography.body,
-    color: Colors.textSecondary,
+    color: Colors.textOnCardSecondary,
     textAlign: 'center',
   },
 });

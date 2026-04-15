@@ -152,7 +152,7 @@ export function ChangeDateSheet({
             activeOpacity={0.85}
             onPress={handleSave}
           >
-            <Ionicons name="checkmark" size={18} color={Colors.surface} />
+            <Ionicons name="checkmark" size={18} color={"#FFFFFF"} />
             <Text style={styles.saveText}>Save</Text>
           </TouchableOpacity>
         </View>
@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: Radius.lg,
-    backgroundColor: Colors.primaryLight,
+    backgroundColor: Colors.primaryTinted,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -277,6 +277,6 @@ const styles = StyleSheet.create({
   saveText: {
     ...Typography.bodyMed,
     fontWeight: '700',
-    color: Colors.surface,
+    color: '#FFFFFF',
   },
 });

@@ -22,12 +22,12 @@ import { CategoryGlyph } from '../../src/components/CategoryGlyph';
 import type { PhotoAttribution } from '../../src/lib/unsplash';
 
 const TRIP_SECTIONS = [
-  { route: '/trip/flights', label: 'Flights', icon: 'airplane-outline', color: '#3B82F6', bg: '#EFF6FF' },
-  { route: '/trip/reservations', label: 'Reservations', icon: 'document-text-outline', color: '#8B5CF6', bg: '#F5F3FF' },
-  { route: '/trip/journal', label: 'Journal', icon: 'book-outline', color: '#10B981', bg: '#ECFDF5' },
-  { route: '/trip/members', label: 'Members', icon: 'people-outline', color: '#F59E0B', bg: '#FFFBEB' },
-  { route: '/trip/bookings', label: 'Bookings', icon: 'pricetag-outline', color: '#EC4899', bg: '#FDF2F8' },
-  { route: '/trip/recap', label: 'Recap', icon: 'trophy-outline', color: '#F26A1C', bg: '#FFF7ED' },
+  { route: '/trip/flights', label: 'Flights', icon: 'airplane-outline', color: '#3AA4FF', bg: 'rgba(58,164,255,0.15)' },
+  { route: '/trip/reservations', label: 'Reservations', icon: 'document-text-outline', color: '#E94A8B', bg: 'rgba(233,74,139,0.15)' },
+  { route: '/trip/journal', label: 'Journal', icon: 'book-outline', color: '#22C55E', bg: 'rgba(34,197,94,0.15)' },
+  { route: '/trip/members', label: 'Members', icon: 'people-outline', color: '#F59E0B', bg: 'rgba(245,158,11,0.15)' },
+  { route: '/trip/bookings', label: 'Bookings', icon: 'pricetag-outline', color: '#C94FBF', bg: 'rgba(201,79,191,0.15)' },
+  { route: '/trip/recap', label: 'Recap', icon: 'trophy-outline', color: '#4F8CFF', bg: 'rgba(79,140,255,0.15)' },
 ] as const;
 
 export default function TripHomeScreen() {
@@ -257,7 +257,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.sm,
     paddingVertical: 6,
     borderRadius: Radius.full,
-    backgroundColor: 'rgba(0,0,0,0.45)',
+    backgroundColor: 'rgba(255,255,255,0.15)',
   },
   coverBtnText: {
     ...Typography.micro,
@@ -270,14 +270,13 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
     borderTopLeftRadius: Radius.sheet,
     borderTopRightRadius: Radius.sheet,
-    ...Shadows.sheet,
   },
   handle: {
     alignSelf: 'center',
     width: 36,
     height: 5,
     borderRadius: 2.5,
-    backgroundColor: 'rgba(0,0,0,0.15)',
+    backgroundColor: 'rgba(255,255,255,0.20)',
     marginBottom: Spacing.md,
   },
   organizerEyebrow: {
@@ -308,7 +307,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.card,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     borderRadius: Radius.md,
@@ -317,12 +316,12 @@ const styles = StyleSheet.create({
   },
   stopName: {
     ...Typography.bodyMed,
-    color: Colors.text,
+    color: Colors.textOnCard,
     flex: 1,
   },
   stopDate: {
     ...Typography.caption,
-    color: Colors.textSecondary,
+    color: Colors.textOnCardSecondary,
   },
   sectionGrid: {
     flexDirection: 'row',
@@ -338,10 +337,9 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     backgroundColor: Colors.surface,
     borderRadius: Radius.lg,
-    borderWidth: StyleSheet.hairlineWidth,
+    borderWidth: 1,
     borderColor: Colors.border,
     gap: Spacing.xs,
-    ...Shadows.sm,
   },
   sectionIcon: {
     width: 40,

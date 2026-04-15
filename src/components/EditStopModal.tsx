@@ -194,7 +194,7 @@ export function EditStopModal({ visible, stop, onClose, onSave }: Props) {
             onPress={handleSubmit}
             disabled={submitting}
           >
-            <Ionicons name="checkmark-circle" size={20} color={Colors.surface} />
+            <Ionicons name="checkmark-circle" size={20} color={"#FFFFFF"} />
             <Text style={styles.submitText}>
               {submitting ? 'Saving…' : 'Save Changes'}
             </Text>
@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
   },
   categoryChipActive: {
     borderColor: Colors.primary,
-    backgroundColor: Colors.primaryLight,
+    backgroundColor: Colors.primaryTinted,
   },
   categoryLabel: {
     ...Typography.micro,
@@ -293,7 +293,7 @@ const styles = StyleSheet.create({
   },
   submitText: {
     ...Typography.bodyMed,
-    color: Colors.surface,
+    color: '#FFFFFF',
     fontWeight: '700',
   },
 });

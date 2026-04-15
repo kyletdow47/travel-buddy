@@ -186,7 +186,7 @@ export default function RecapScreen() {
         activeOpacity={0.85}
         onPress={handleShare}
       >
-        <Ionicons name="share-outline" size={20} color={Colors.surface} />
+        <Ionicons name="share-outline" size={20} color="#FFFFFF" />
         <Text style={styles.shareText}>Share Recap</Text>
       </TouchableOpacity>
     </ScrollView>
@@ -267,7 +267,7 @@ const styles = StyleSheet.create({
   },
   heroTitle: {
     ...Typography.display,
-    color: Colors.surface,
+    color: '#FFFFFF',
     textAlign: 'center',
   },
   heroSubtitle: {
@@ -286,22 +286,22 @@ const styles = StyleSheet.create({
   },
   statBox: {
     width: '47%',
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.card,
     borderRadius: Radius.xl,
     padding: Spacing.md,
     alignItems: 'center',
     gap: Spacing.xs,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: Colors.border,
+    borderColor: Colors.borderOnCard,
     ...Shadows.sm,
   },
   statValue: {
     ...Typography.h1,
-    color: Colors.text,
+    color: Colors.textOnCard,
   },
   statLabel: {
     ...Typography.caption,
-    color: Colors.textSecondary,
+    color: Colors.textOnCardSecondary,
   },
 
   // Section
@@ -319,12 +319,12 @@ const styles = StyleSheet.create({
   highlightRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.card,
     borderRadius: Radius.lg,
     padding: Spacing.md,
     marginBottom: Spacing.sm,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: Colors.border,
+    borderColor: Colors.borderOnCard,
     ...Shadows.sm,
   },
   highlightMedal: {
@@ -338,15 +338,15 @@ const styles = StyleSheet.create({
   highlightName: {
     ...Typography.bodyMed,
     fontWeight: '700',
-    color: Colors.text,
+    color: Colors.textOnCard,
   },
   highlightLocation: {
     ...Typography.caption,
-    color: Colors.textSecondary,
+    color: Colors.textOnCardSecondary,
   },
   highlightCategory: {
     ...Typography.micro,
-    color: Colors.textTertiary,
+    color: Colors.textOnCardTertiary,
     textTransform: 'capitalize',
   },
 
@@ -365,7 +365,7 @@ const styles = StyleSheet.create({
   },
   shareText: {
     ...Typography.bodyMed,
-    color: Colors.surface,
+    color: '#FFFFFF',
     fontWeight: '700',
   },
 });

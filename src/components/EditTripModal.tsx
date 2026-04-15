@@ -596,7 +596,7 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
   },
   segmentTextActive: {
-    color: Colors.surface,
+    color: '#FFFFFF',
   },
 
   // Date row
@@ -700,7 +700,7 @@ const styles = StyleSheet.create({
     color: Colors.text,
   },
   cellTextSelected: {
-    color: Colors.surface,
+    color: '#FFFFFF',
     fontWeight: '700',
   },
   cellTextDisabled: {

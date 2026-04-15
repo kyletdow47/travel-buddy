@@ -42,7 +42,7 @@ function serviceColor(type: string): string {
     case 'activities':
       return Colors.category.activity;
     default:
-      return Colors.textSecondary;
+      return Colors.textOnCardSecondary;
   }
 }
 
@@ -68,7 +68,7 @@ function BookingLinkRowBase({ service }: Props) {
         <Text style={styles.name}>{service.name}</Text>
         <Text style={styles.subtitle}>Search deals</Text>
       </View>
-      <Ionicons name="arrow-forward" size={18} color={Colors.textTertiary} />
+      <Ionicons name="arrow-forward" size={18} color={Colors.textOnCardTertiary} />
     </TouchableOpacity>
   );
 }
@@ -79,13 +79,13 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.card,
     borderRadius: Radius.lg,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.md,
     gap: Spacing.md,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: Colors.border,
+    borderColor: Colors.borderOnCard,
   },
   iconCircle: {
     width: 40,
@@ -100,11 +100,11 @@ const styles = StyleSheet.create({
   },
   name: {
     ...Typography.bodyMed,
-    color: Colors.text,
+    color: Colors.textOnCard,
     fontWeight: '600',
   },
   subtitle: {
     ...Typography.caption,
-    color: Colors.textSecondary,
+    color: Colors.textOnCardSecondary,
   },
 });

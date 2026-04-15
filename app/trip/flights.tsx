@@ -108,7 +108,7 @@ export default function FlightsScreen() {
         activeOpacity={0.85}
         onPress={handleAddFlight}
       >
-        <Ionicons name="add" size={24} color={Colors.surface} />
+        <Ionicons name="add" size={24} color="#FFFFFF" />
         <Text style={styles.fabText}>Add Flight</Text>
       </TouchableOpacity>
     </View>
@@ -133,8 +133,15 @@ const styles = StyleSheet.create({
   },
   empty: {
     alignItems: 'center',
-    paddingTop: Spacing.xxxl * 2,
+    paddingTop: Spacing.xxxl,
+    paddingBottom: Spacing.xxl,
+    paddingHorizontal: Spacing.xl,
+    marginHorizontal: Spacing.lg,
+    marginTop: Spacing.xxl,
+    backgroundColor: Colors.card,
+    borderRadius: Radius.xl,
     gap: Spacing.sm,
+    ...Shadows.sm,
   },
   emptyIcon: {
     width: 72,
@@ -147,17 +154,17 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     ...Typography.h2,
-    color: Colors.text,
+    color: Colors.textOnCard,
   },
   emptyText: {
     ...Typography.body,
-    color: Colors.textSecondary,
+    color: Colors.textOnCardSecondary,
     textAlign: 'center',
     maxWidth: 260,
   },
   fab: {
     position: 'absolute',
-    bottom: Spacing.xl,
+    bottom: 100,
     right: Spacing.lg,
     flexDirection: 'row',
     alignItems: 'center',
@@ -170,7 +177,7 @@ const styles = StyleSheet.create({
   },
   fabText: {
     ...Typography.bodyMed,
-    color: Colors.surface,
+    color: '#FFFFFF',
     fontWeight: '700',
   },
 });

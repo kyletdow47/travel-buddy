@@ -41,7 +41,7 @@ export default function PaywallScreen() {
 
   return (
     <GradientScreen
-      colors={['#0E0E10', '#1A0B2A', '#2A1040']}
+      colors={[Colors.background, '#1A0B2A', '#2A1040']}
       safeArea
       contentStyle={styles.container}
     >
@@ -54,7 +54,7 @@ export default function PaywallScreen() {
           router.back();
         }}
       >
-        <Ionicons name="close" size={24} color={Colors.textOnDarkSecondary} />
+        <Ionicons name="close" size={24} color={Colors.textSecondary} />
       </TouchableOpacity>
 
       <ScrollView
@@ -92,7 +92,7 @@ export default function PaywallScreen() {
               {index > 0 && <View style={styles.featureDivider} />}
               <View style={styles.featureRow}>
                 <View style={styles.featureLabelCol}>
-                  <Ionicons name={feature.icon} size={18} color={Colors.textOnDarkSecondary} />
+                  <Ionicons name={feature.icon} size={18} color={Colors.textSecondary} />
                   <Text style={styles.featureLabel}>{feature.label}</Text>
                 </View>
                 <View style={styles.planCol}>
@@ -121,7 +121,7 @@ export default function PaywallScreen() {
           activeOpacity={0.85}
           onPress={handleSubscribe}
         >
-          <Ionicons name="diamond" size={20} color={Colors.surface} />
+          <Ionicons name="diamond" size={20} color="#FFFFFF" />
           <Text style={styles.subscribeButtonText}>Subscribe to Pro</Text>
         </TouchableOpacity>
 
@@ -202,12 +202,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.sm,
-    backgroundColor: 'rgba(242,106,28,0.15)',
+    backgroundColor: 'rgba(79,140,255,0.15)',
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.sm,
     borderRadius: Radius.full,
     borderWidth: 1,
-    borderColor: 'rgba(242,106,28,0.3)',
+    borderColor: 'rgba(79,140,255,0.3)',
   },
   proBadgeText: {
     ...Typography.eyebrow,
@@ -215,12 +215,12 @@ const styles = StyleSheet.create({
   },
   heroTitle: {
     ...Typography.displaySm,
-    color: Colors.textOnDark,
+    color: Colors.text,
     textAlign: 'center',
   },
   heroSubtitle: {
     ...Typography.body,
-    color: Colors.textOnDarkSecondary,
+    color: Colors.textSecondary,
     textAlign: 'center',
     lineHeight: 24,
     paddingHorizontal: Spacing.sm,
@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
   },
   planHeaderText: {
     ...Typography.micro,
-    color: Colors.textOnDarkTertiary,
+    color: Colors.textTertiary,
   },
   planHeaderPro: {
     color: Colors.primary,
@@ -267,7 +267,7 @@ const styles = StyleSheet.create({
   },
   featureLabel: {
     ...Typography.body,
-    color: Colors.textOnDarkSecondary,
+    color: Colors.textSecondary,
     fontSize: 14,
   },
   featureDivider: {
@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
   },
   featureValueText: {
     ...Typography.micro,
-    color: Colors.textOnDarkTertiary,
+    color: Colors.textTertiary,
     textAlign: 'center',
   },
   featureValuePro: {
@@ -296,15 +296,15 @@ const styles = StyleSheet.create({
   },
   priceAmount: {
     ...Typography.display,
-    color: Colors.textOnDark,
+    color: Colors.text,
   },
   pricePeriod: {
     ...Typography.body,
-    color: Colors.textOnDarkSecondary,
+    color: Colors.textSecondary,
   },
   priceNote: {
     ...Typography.caption,
-    color: Colors.textOnDarkTertiary,
+    color: Colors.textTertiary,
   },
 
   // Buttons
@@ -320,7 +320,7 @@ const styles = StyleSheet.create({
   },
   subscribeButtonText: {
     ...Typography.h3,
-    color: Colors.surface,
+    color: '#FFFFFF',
     fontWeight: '700',
   },
   restoreButton: {
@@ -330,7 +330,7 @@ const styles = StyleSheet.create({
   },
   restoreButtonText: {
     ...Typography.bodyMed,
-    color: Colors.textOnDarkTertiary,
+    color: Colors.textTertiary,
     textDecorationLine: 'underline',
   },
 

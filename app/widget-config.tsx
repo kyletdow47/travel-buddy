@@ -148,7 +148,7 @@ export default function WidgetConfigScreen() {
                 ))}
               </View>
             </View>
-            <Ionicons name="chevron-forward" size={18} color={Colors.textTertiary} />
+            <Ionicons name="chevron-forward" size={18} color={Colors.textOnCardTertiary} />
           </TouchableOpacity>
         ))}
 
@@ -159,11 +159,11 @@ export default function WidgetConfigScreen() {
         </Text>
         <View style={styles.lockScreenPreview}>
           <View style={styles.lockWidget}>
-            <Ionicons name="airplane" size={14} color={Colors.surface} />
+            <Ionicons name="airplane" size={14} color={"#FFFFFF"} />
             <Text style={styles.lockWidgetText}>SFO → NRT</Text>
           </View>
           <View style={styles.lockWidget}>
-            <Ionicons name="time" size={14} color={Colors.surface} />
+            <Ionicons name="time" size={14} color={"#FFFFFF"} />
             <Text style={styles.lockWidgetText}>3d 14h</Text>
           </View>
         </View>
@@ -181,14 +181,14 @@ export default function WidgetConfigScreen() {
             activeOpacity={0.85}
             onPress={() => handleWatchTap(comp.name)}
           >
-            <View style={[styles.widgetIcon, { backgroundColor: '#1C1C1E' }]}>
+            <View style={[styles.widgetIcon, { backgroundColor: Colors.surface }]}>
               <Ionicons name={comp.icon} size={24} color="#00FF88" />
             </View>
             <View style={styles.widgetInfo}>
               <Text style={styles.widgetName}>{comp.name}</Text>
               <Text style={styles.widgetDesc}>{comp.description}</Text>
             </View>
-            <Ionicons name="chevron-forward" size={18} color={Colors.textTertiary} />
+            <Ionicons name="chevron-forward" size={18} color={Colors.textOnCardTertiary} />
           </TouchableOpacity>
         ))}
 
@@ -233,13 +233,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.sm,
     padding: Spacing.md,
-    backgroundColor: Colors.primaryLight,
+    backgroundColor: Colors.surfaceElevated,
     borderRadius: Radius.lg,
     marginBottom: Spacing.lg,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   contextText: {
     ...Typography.caption,
-    color: Colors.primary,
+    color: Colors.textSecondary,
     flex: 1,
   },
   sectionTitle: {
@@ -256,10 +258,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: Spacing.md,
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.card,
     borderRadius: Radius.xl,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: Colors.border,
+    borderColor: Colors.borderOnCard,
     marginBottom: Spacing.sm,
     gap: Spacing.md,
     ...Shadows.sm,
@@ -278,12 +280,12 @@ const styles = StyleSheet.create({
   },
   widgetName: {
     ...Typography.bodyMed,
-    color: Colors.text,
+    color: Colors.textOnCard,
     fontWeight: '700',
   },
   widgetDesc: {
     ...Typography.caption,
-    color: Colors.textSecondary,
+    color: Colors.textOnCardSecondary,
   },
   sizeRow: {
     flexDirection: 'row',
@@ -293,19 +295,19 @@ const styles = StyleSheet.create({
   sizeBadge: {
     paddingHorizontal: 8,
     paddingVertical: 2,
-    backgroundColor: Colors.surfaceDim,
+    backgroundColor: Colors.cardSecondary,
     borderRadius: Radius.full,
   },
   sizeText: {
     ...Typography.micro,
-    color: Colors.textSecondary,
+    color: Colors.textOnCardSecondary,
   },
   lockScreenPreview: {
     flexDirection: 'row',
     justifyContent: 'center',
     gap: Spacing.md,
     padding: Spacing.xl,
-    backgroundColor: '#1C1C1E',
+    backgroundColor: Colors.surface,
     borderRadius: Radius.xl,
     marginBottom: Spacing.sm,
   },
@@ -320,22 +322,22 @@ const styles = StyleSheet.create({
   },
   lockWidgetText: {
     ...Typography.micro,
-    color: Colors.surface,
+    color: '#FFFFFF',
     fontWeight: '600',
   },
   siriCard: {
     alignItems: 'center',
     padding: Spacing.xl,
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.card,
     borderRadius: Radius.xl,
     borderWidth: 1.5,
-    borderColor: Colors.border,
+    borderColor: Colors.borderOnCard,
     borderStyle: 'dashed',
     gap: Spacing.sm,
   },
   siriText: {
     ...Typography.caption,
-    color: Colors.textSecondary,
+    color: Colors.textOnCardSecondary,
     textAlign: 'center',
   },
 });

@@ -161,7 +161,7 @@ export function AddJournalEntryModal({ visible, tripId, onClose, onAdd }: Props)
             onPress={handleSubmit}
             disabled={submitting}
           >
-            <Ionicons name="pencil" size={20} color={Colors.surface} />
+            <Ionicons name="pencil" size={20} color={"#FFFFFF"} />
             <Text style={styles.submitText}>
               {submitting ? 'Saving...' : 'Save Entry'}
             </Text>
@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
   },
   moodChipActive: {
     borderColor: Colors.primary,
-    backgroundColor: Colors.primaryLight,
+    backgroundColor: Colors.primaryTinted,
   },
   moodEmoji: {
     fontSize: 24,
@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
   },
   submitText: {
     ...Typography.bodyMed,
-    color: Colors.surface,
+    color: '#FFFFFF',
     fontWeight: '700',
   },
 });

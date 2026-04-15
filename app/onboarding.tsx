@@ -136,7 +136,7 @@ export default function OnboardingScreen() {
             onPress={handleGetStarted}
           >
             <Text style={styles.ctaButtonText}>Get Started</Text>
-            <Ionicons name="arrow-forward" size={20} color={Colors.surface} />
+            <Ionicons name="arrow-forward" size={20} color="#FFFFFF" />
           </TouchableOpacity>
         ) : (
           <View style={styles.buttonRow}>
@@ -154,7 +154,7 @@ export default function OnboardingScreen() {
               onPress={handleNext}
             >
               <Text style={styles.nextButtonText}>Next</Text>
-              <Ionicons name="chevron-forward" size={18} color={Colors.surface} />
+              <Ionicons name="chevron-forward" size={18} color="#FFFFFF" />
             </TouchableOpacity>
           </View>
         )}
@@ -188,13 +188,13 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   title: {
-    ...Typography.h1,
-    color: Colors.textOnDark,
+    ...Typography.displaySm,
+    color: Colors.text,
     textAlign: 'center',
   },
   subtitle: {
     ...Typography.body,
-    color: Colors.textOnDarkSecondary,
+    color: Colors.textSecondary,
     textAlign: 'center',
     lineHeight: 24,
     paddingHorizontal: Spacing.md,
@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
   },
   ctaButtonText: {
     ...Typography.h3,
-    color: Colors.surface,
+    color: '#FFFFFF',
     fontWeight: '700',
   },
   buttonRow: {
@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
   },
   skipButtonText: {
     ...Typography.bodyMed,
-    color: Colors.textOnDarkTertiary,
+    color: Colors.textTertiary,
   },
   nextButton: {
     flexDirection: 'row',
@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
   },
   nextButtonText: {
     ...Typography.bodyMed,
-    color: Colors.surface,
+    color: '#FFFFFF',
     fontWeight: '700',
   },
 });

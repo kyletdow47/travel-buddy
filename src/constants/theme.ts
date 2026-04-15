@@ -4,36 +4,45 @@
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 export const Colors = {
-  // ── Primary accent — Tripsy warm orange
-  primary: '#F26A1C',
-  primaryLight: '#FFE6D4',
-  primaryDark: '#C2500F',
+  // ── Primary accent — cool blue
+  primary: '#4F8CFF',
+  primaryLight: 'rgba(79,140,255,0.20)',
+  primaryTinted: 'rgba(79,140,255,0.15)',
+  primaryDark: '#3A6FCC',
 
-  // ── Surfaces (light mode base)
-  background: '#F7F7F9',
-  surface: '#FFFFFF',
-  surfaceElevated: '#FFFFFF',
-  surfaceDim: '#EFEFF3',
+  // ── Surfaces (dark-first — Tripsy navy aesthetic)
+  background: '#0B1120',
+  backgroundSecondary: '#111827',
+  surface: '#1A2235',
+  surfaceElevated: '#1F2A40',
+  surfaceDim: '#0A0F1A',
 
-  // ── Dark surfaces — used behind frosted sheets
-  surfaceDark: '#1C1C20',
-  surfaceDarkElevated: '#242428',
+  // ── Card surfaces — glass overlays on dark backgrounds
+  card: 'rgba(255,255,255,0.07)',
+  cardSecondary: 'rgba(255,255,255,0.04)',
+  cardElevated: 'rgba(255,255,255,0.10)',
 
-  // ── Text (light)
-  text: '#111216',
-  textSecondary: '#6B6E76',
-  textTertiary: '#9AA0A6',
+  // ── Text (primary — light on dark)
+  text: '#FFFFFF',
+  textSecondary: 'rgba(255,255,255,0.72)',
+  textTertiary: 'rgba(255,255,255,0.48)',
 
-  // ── Text (on dark / over photos)
+  // ── Text (on cards — light on glass)
+  textOnCard: '#FFFFFF',
+  textOnCardSecondary: 'rgba(255,255,255,0.72)',
+  textOnCardTertiary: 'rgba(255,255,255,0.48)',
+
+  // ── Legacy aliases for backward compat
   textOnDark: '#FFFFFF',
   textOnDarkSecondary: 'rgba(255,255,255,0.72)',
   textOnDarkTertiary: 'rgba(255,255,255,0.48)',
 
   // ── Borders
-  border: '#E7E7EB',
-  borderStrong: '#D4D4D8',
-  borderFocus: '#F26A1C',
+  border: 'rgba(255,255,255,0.08)',
+  borderStrong: 'rgba(255,255,255,0.15)',
+  borderFocus: '#4F8CFF',
   borderOnDark: 'rgba(255,255,255,0.10)',
+  borderOnCard: 'rgba(255,255,255,0.10)',
 
   // ── Semantic
   success: '#22C55E',
@@ -42,16 +51,20 @@ export const Colors = {
   info: '#3AA4FF',
 
   // ── Overlays & scrims
-  overlay: 'rgba(0, 0, 0, 0.45)',
-  scrimTop: 'rgba(0,0,0,0)',
-  scrimBottom: 'rgba(0,0,0,0.55)',
+  overlay: 'rgba(0, 0, 0, 0.55)',
+  scrimTop: 'rgba(11,17,32,0)',
+  scrimBottom: 'rgba(11,17,32,0.85)',
 
   // ── Frosted-sheet fills (RGBA w/ BlurView underneath)
-  frostedDark: 'rgba(28,28,32,0.72)',
-  frostedDarkStrong: 'rgba(20,20,24,0.85)',
-  frostedLight: 'rgba(255,255,255,0.72)',
-  frostedTintedOnDark: 'rgba(255,255,255,0.10)',
-  frostedTintedOnLight: 'rgba(0,0,0,0.06)',
+  frostedDark: 'rgba(11,17,32,0.80)',
+  frostedDarkStrong: 'rgba(8,12,24,0.90)',
+  frostedLight: 'rgba(255,255,255,0.08)',
+  frostedTintedOnDark: 'rgba(255,255,255,0.06)',
+  frostedTintedOnLight: 'rgba(255,255,255,0.12)',
+
+  // ── Tab bar
+  tabBar: 'rgba(11,17,32,0.95)',
+  tabBarBorder: 'rgba(255,255,255,0.06)',
 
   // ── Category glyph palette (Tripsy screenshot-accurate)
   category: {
@@ -73,21 +86,18 @@ export const Colors = {
 
   // ── Gradient presets (for per-category GradientScreen)
   gradient: {
+    // Main app background gradient
+    screen: ['#0B1120', '#111827', '#0B1120'],
+    screenAlt: ['#0B1120', '#1A1040', '#0B1120'],
+    // Category-specific
     flight: ['#0B1E3A', '#1E3A8A', '#0B1E3A'],
     lodging: ['#3A0B28', '#8A1E58', '#3A0B28'],
     alert: ['#0B0F2A', '#3B0F3A', '#601E3C'],
-    places: ['#2A0B0B', '#8A3A1E', '#F26A1C'],
+    places: ['#0B1E3A', '#1E3A6A', '#4F8CFF'],
     trip: ['rgba(0,0,0,0.0)', 'rgba(0,0,0,0.55)'],
     hero: ['rgba(0,0,0,0.0)', 'rgba(0,0,0,0.75)'],
-  },
-
-  // ── Dark mode palette
-  dark: {
-    background: '#0E0E10',
-    backgroundSecondary: '#17171A',
-    text: '#F7F7F9',
-    textSecondary: '#A1A1AA',
-    border: '#2A2A2F',
+    // Card accent gradients
+    cardGlow: ['rgba(79,140,255,0.0)', 'rgba(79,140,255,0.05)'],
   },
 } as const;
 
@@ -140,6 +150,8 @@ export const Spacing = {
   xl: 24,
   xxl: 32,
   xxxl: 48,
+  '4xl': 64,
+  '5xl': 80,
 } as const;
 
 export const Radius = {
@@ -157,23 +169,23 @@ export const Radius = {
 export const Shadows = {
   sm: {
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 3,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
     elevation: 2,
   },
   md: {
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
     elevation: 4,
   },
   lg: {
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 20,
     elevation: 8,
   },
   // Frosted sheet floating over hero photo — softer, taller drop

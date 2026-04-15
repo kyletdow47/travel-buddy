@@ -197,7 +197,7 @@ export default function PlanScreen() {
               setAddModalOpen(true);
             }}
           >
-            <Ionicons name="add" size={22} color={Colors.surface} />
+            <Ionicons name="add" size={22} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
       )}
@@ -341,13 +341,13 @@ function StopsSkeleton() {
 function InlineEmpty({ onAdd }: { onAdd: () => void }) {
   return (
     <View style={styles.inlineEmpty}>
-      <Ionicons name="location-outline" size={44} color={Colors.textTertiary} />
+      <Ionicons name="location-outline" size={44} color={Colors.textOnCardTertiary} />
       <Text style={styles.inlineEmptyTitle}>No stops yet</Text>
       <Text style={styles.inlineEmptySubtitle}>
         Add flights, hotels, activities and more to build your itinerary.
       </Text>
       <TouchableOpacity style={styles.ctaButton} activeOpacity={0.85} onPress={onAdd}>
-        <Ionicons name="add" size={18} color={Colors.surface} />
+        <Ionicons name="add" size={18} color="#FFFFFF" />
         <Text style={styles.ctaText}>Add First Stop</Text>
       </TouchableOpacity>
     </View>
@@ -403,7 +403,7 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
   },
   selectorTextActive: {
-    color: Colors.surface,
+    color: '#FFFFFF',
   },
 
   // Banner
@@ -437,7 +437,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: Colors.surfaceDim,
+    backgroundColor: Colors.surfaceElevated,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: Spacing.xs,
@@ -486,7 +486,7 @@ const styles = StyleSheet.create({
   },
   dayBadgeText: {
     ...Typography.micro,
-    color: Colors.surface,
+    color: '#FFFFFF',
     fontWeight: '800',
   },
   dayHeaderTitle: {
@@ -514,7 +514,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.xxxl,
     marginTop: Spacing.lg,
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.card,
     borderRadius: Radius.xl,
     borderWidth: 1.5,
     borderColor: Colors.border,
@@ -523,12 +523,12 @@ const styles = StyleSheet.create({
   },
   inlineEmptyTitle: {
     ...Typography.h3,
-    color: Colors.text,
+    color: Colors.textOnCard,
     marginTop: Spacing.xs,
   },
   inlineEmptySubtitle: {
     ...Typography.body,
-    color: Colors.textSecondary,
+    color: Colors.textOnCardSecondary,
     textAlign: 'center',
   },
   ctaButton: {
@@ -544,7 +544,7 @@ const styles = StyleSheet.create({
   },
   ctaText: {
     ...Typography.bodyMed,
-    color: Colors.surface,
+    color: '#FFFFFF',
     fontWeight: '700',
   },
 
@@ -555,6 +555,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: Spacing.xxl,
     gap: Spacing.md,
+    backgroundColor: Colors.background,
   },
   fullEmptyTitle: {
     ...Typography.h2,

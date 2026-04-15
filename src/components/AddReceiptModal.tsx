@@ -199,7 +199,7 @@ export function AddReceiptModal({ visible, tripId, onClose, onAdd }: Props) {
             onPress={handleSubmit}
             disabled={submitting}
           >
-            <Ionicons name="receipt" size={20} color={Colors.surface} />
+            <Ionicons name="receipt" size={20} color={"#FFFFFF"} />
             <Text style={styles.submitText}>
               {submitting ? 'Adding…' : 'Add Receipt'}
             </Text>
@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
   },
   submitText: {
     ...Typography.bodyMed,
-    color: Colors.surface,
+    color: '#FFFFFF',
     fontWeight: '700',
   },
 });

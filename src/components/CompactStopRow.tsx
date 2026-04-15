@@ -119,12 +119,12 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.card,
     borderRadius: Radius.md,
     paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.md,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: Colors.border,
+    borderColor: Colors.borderOnCard,
     minHeight: 36,
     ...Shadows.sm,
   },
@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
   name: {
     ...Typography.bodyMed,
     fontWeight: '600',
-    color: Colors.text,
+    color: Colors.textOnCard,
     flexShrink: 1,
   },
 
@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
 
   dateText: {
     ...Typography.caption,
-    color: Colors.textTertiary,
+    color: Colors.textOnCardTertiary,
     marginRight: Spacing.sm,
   },
 

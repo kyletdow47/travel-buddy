@@ -175,7 +175,7 @@ export function AddPackingItemModal({ visible, tripId, onClose, onAdd }: Props) 
             onPress={handleSubmit}
             disabled={submitting}
           >
-            <Ionicons name="add-circle" size={20} color={Colors.surface} />
+            <Ionicons name="add-circle" size={20} color={"#FFFFFF"} />
             <Text style={styles.submitText}>
               {submitting ? 'Adding...' : 'Add Item'}
             </Text>
@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
   },
   submitText: {
     ...Typography.bodyMed,
-    color: Colors.surface,
+    color: '#FFFFFF',
     fontWeight: '700',
   },
 });

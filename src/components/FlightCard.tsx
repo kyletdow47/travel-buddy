@@ -84,12 +84,12 @@ export const FlightCard = memo(FlightCardBase);
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.card,
     borderRadius: Radius.xl,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.md,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: Colors.border,
+    borderColor: Colors.borderOnCard,
     gap: Spacing.sm,
     ...Shadows.sm,
   },
@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
   },
   eyebrow: {
     ...Typography.micro,
-    color: Colors.textSecondary,
+    color: Colors.textOnCardSecondary,
     flex: 1,
   },
   routeRow: {
@@ -120,16 +120,16 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: -0.5,
     lineHeight: 32,
-    color: Colors.text,
+    color: Colors.textOnCard,
   },
   cityText: {
     ...Typography.caption,
-    color: Colors.textSecondary,
+    color: Colors.textOnCardSecondary,
     marginTop: 2,
   },
   timeText: {
     ...Typography.caption,
-    color: Colors.textTertiary,
+    color: Colors.textOnCardTertiary,
     fontVariant: ['tabular-nums'],
     marginTop: 1,
   },
@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
   },
   duration: {
     ...Typography.micro,
-    color: Colors.textTertiary,
+    color: Colors.textOnCardTertiary,
     marginTop: 2,
   },
   footerRow: {

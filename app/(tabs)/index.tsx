@@ -7,7 +7,6 @@ import {
   Image,
   TouchableOpacity,
   Animated,
-  FlatList,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -16,7 +15,6 @@ import { Colors, Typography, Spacing, Radius, Shadows } from '../../src/constant
 import { haptics } from '../../src/lib/haptics';
 import { AnimatedEnter } from '../../src/components/AnimatedEnter';
 
-// Static destination photos for the inspiration strip
 const DESTINATION_PHOTOS = [
   { id: '1', uri: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=300&h=200&fit=crop', label: 'Bali' },
   { id: '2', uri: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=300&h=200&fit=crop', label: 'Paris' },
@@ -27,7 +25,6 @@ const DESTINATION_PHOTOS = [
 ];
 
 const FILTER_OPTIONS = ['All', 'Active', 'Planning', 'Completed'] as const;
-
 type FilterOption = (typeof FILTER_OPTIONS)[number];
 
 export default function HomeScreen() {
@@ -73,6 +70,7 @@ export default function HomeScreen() {
           {DESTINATION_PHOTOS.map((photo) => (
             <View key={photo.id} style={styles.photoTile}>
               <Image source={{ uri: photo.uri }} style={styles.photoImage} />
+              <View style={styles.photoOverlay} />
               <Text style={styles.photoLabel}>{photo.label}</Text>
             </View>
           ))}
@@ -95,58 +93,63 @@ export default function HomeScreen() {
           Just type your dream destination. we'll handle the plan
         </Text>
 
-        {/* Section Header */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>My Trips</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.filterRow}
-          >
-            {FILTER_OPTIONS.map((option) => (
-              <TouchableOpacity
-                key={option}
-                style={[
-                  styles.filterChip,
-                  activeFilter === option && styles.filterChipActive,
-                ]}
-                activeOpacity={0.7}
-                onPress={() => {
-                  haptics.selection();
-                  setActiveFilter(option);
-                }}
-              >
-                <Text
+        {/* My Trips — white card section */}
+        <View style={styles.tripsCard}>
+          <View style={styles.tripsCardHeader}>
+            <Text style={styles.tripsCardTitle}>My Trips</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.filterRow}
+            >
+              {FILTER_OPTIONS.map((option) => (
+                <TouchableOpacity
+                  key={option}
                   style={[
-                    styles.filterChipText,
-                    activeFilter === option && styles.filterChipTextActive,
+                    styles.filterChip,
+                    activeFilter === option && styles.filterChipActive,
                   ]}
+                  activeOpacity={0.7}
+                  onPress={() => {
+                    haptics.selection();
+                    setActiveFilter(option);
+                  }}
                 >
-                  {option}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-
-        {/* Empty State */}
-        <AnimatedEnter style={styles.emptyState}>
-          <View style={styles.emptyIcon}>
-            <Ionicons name="airplane-outline" size={48} color={Colors.textTertiary} />
+                  <Text
+                    style={[
+                      styles.filterChipText,
+                      activeFilter === option && styles.filterChipTextActive,
+                    ]}
+                  >
+                    {option}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           </View>
-          <Text style={styles.emptyTitle}>No trips yet</Text>
-          <Text style={styles.emptySubtitle}>
-            Your adventures will show up here once you create your first trip.
-          </Text>
-          <TouchableOpacity
-            style={styles.ctaButton}
-            activeOpacity={0.8}
-            onPress={() => haptics.medium()}
-          >
-            <Ionicons name="add" size={20} color={Colors.surface} />
-            <Text style={styles.ctaButtonText}>Create your first trip</Text>
-          </TouchableOpacity>
-        </AnimatedEnter>
+
+          {/* Empty State */}
+          <AnimatedEnter style={styles.emptyState}>
+            <View style={styles.emptyIcon}>
+              <Ionicons name="airplane-outline" size={48} color={Colors.textOnCardTertiary} />
+            </View>
+            <Text style={styles.emptyTitle}>No trips yet</Text>
+            <Text style={styles.emptySubtitle}>
+              Your adventures will show up here once you create your first trip.
+            </Text>
+            <TouchableOpacity
+              style={styles.ctaButton}
+              activeOpacity={0.8}
+              onPress={() => {
+                haptics.medium();
+                router.push('/assistant');
+              }}
+            >
+              <Ionicons name="add" size={20} color="#FFFFFF" />
+              <Text style={styles.ctaButtonText}>Create your first trip</Text>
+            </TouchableOpacity>
+          </AnimatedEnter>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -193,7 +196,7 @@ const styles = StyleSheet.create({
   },
   avatarText: {
     ...Typography.bodyMed,
-    color: Colors.surface,
+    color: '#FFFFFF',
     fontWeight: '700',
   },
 
@@ -206,28 +209,34 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   photoTile: {
-    width: 110,
-    height: 90,
-    borderRadius: Radius.md,
+    width: 140,
+    height: 100,
+    borderRadius: Radius.xl,
     overflow: 'hidden',
-    ...Shadows.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.10)',
   },
   photoImage: {
     width: '100%',
     height: '100%',
   },
+  photoOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.25)',
+  },
   photoLabel: {
     position: 'absolute',
-    bottom: Spacing.xs,
+    bottom: Spacing.sm,
     left: Spacing.sm,
     ...Typography.micro,
-    color: Colors.surface,
+    color: '#FFFFFF',
+    fontWeight: '700',
     textShadowColor: 'rgba(0,0,0,0.6)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 3,
   },
 
-  // Search Bar
+  // Search Bar — frosted dark surface
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -236,8 +245,9 @@ const styles = StyleSheet.create({
     height: 52,
     borderRadius: 26,
     backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.border,
     paddingHorizontal: Spacing.md,
-    ...Shadows.md,
   },
   orb: {
     width: 16,
@@ -253,24 +263,35 @@ const styles = StyleSheet.create({
   },
   helperText: {
     ...Typography.caption,
-    color: Colors.textSecondary,
+    color: Colors.textTertiary,
     marginHorizontal: Spacing.lg,
     marginTop: Spacing.sm,
     textAlign: 'center',
   },
 
-  // Section Header
-  sectionHeader: {
+  // Trips Card — glass overlay
+  tripsCard: {
+    marginHorizontal: Spacing.lg,
+    marginTop: Spacing.xxl,
+    backgroundColor: Colors.card,
+    borderRadius: Radius.xxl,
+    paddingTop: Spacing.lg,
+    paddingBottom: Spacing.md,
+    borderWidth: 1,
+    borderColor: Colors.borderOnCard,
+    ...Shadows.lg,
+  },
+  tripsCardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.lg,
-    marginTop: Spacing.xl,
+    marginBottom: Spacing.md,
   },
-  sectionTitle: {
+  tripsCardTitle: {
     fontSize: 17,
     fontWeight: '700',
-    color: Colors.text,
+    color: Colors.textOnCard,
   },
   filterRow: {
     flexDirection: 'row',
@@ -280,9 +301,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.xs,
     borderRadius: Radius.full,
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.cardSecondary,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Colors.borderOnCard,
   },
   filterChipActive: {
     backgroundColor: Colors.primaryLight,
@@ -291,36 +312,35 @@ const styles = StyleSheet.create({
   filterChipText: {
     ...Typography.caption,
     fontWeight: '600',
-    color: Colors.textSecondary,
+    color: Colors.textOnCardSecondary,
   },
   filterChipTextActive: {
     color: Colors.primary,
   },
 
-  // Empty State
+  // Empty State (inside white card)
   emptyState: {
     alignItems: 'center',
     paddingHorizontal: Spacing.xxl,
-    paddingVertical: Spacing.xxxl,
+    paddingVertical: Spacing.xxl,
   },
   emptyIcon: {
     width: 80,
     height: 80,
     borderRadius: Radius.full,
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.cardSecondary,
     alignItems: 'center',
     justifyContent: 'center',
-    ...Shadows.sm,
     marginBottom: Spacing.md,
   },
   emptyTitle: {
     ...Typography.h3,
-    color: Colors.text,
+    color: Colors.textOnCard,
     marginBottom: Spacing.sm,
   },
   emptySubtitle: {
     ...Typography.body,
-    color: Colors.textSecondary,
+    color: Colors.textOnCardSecondary,
     textAlign: 'center',
     marginBottom: Spacing.xl,
   },
@@ -336,7 +356,7 @@ const styles = StyleSheet.create({
   },
   ctaButtonText: {
     ...Typography.bodyMed,
-    color: Colors.surface,
+    color: '#FFFFFF',
     fontWeight: '600',
   },
 });

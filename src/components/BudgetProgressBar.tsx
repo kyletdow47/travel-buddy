@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
   },
   label: {
     ...Typography.caption,
-    color: Colors.textSecondary,
+    color: Colors.textOnCardSecondary,
   },
   percent: {
     ...Typography.caption,
@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
   track: {
     height: 8,
     borderRadius: Radius.full,
-    backgroundColor: Colors.border,
+    backgroundColor: Colors.borderOnCard,
     overflow: 'hidden',
   },
   fill: {

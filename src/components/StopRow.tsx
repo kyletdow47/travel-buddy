@@ -23,7 +23,7 @@ function statusMeta(status: StopStatus) {
     case 'current':
       return { label: 'Now', icon: 'radio-button-on' as const, color: Colors.primary, bg: Colors.primaryLight };
     case 'done':
-      return { label: 'Done', icon: 'checkmark-circle' as const, color: Colors.textSecondary, bg: Colors.border };
+      return { label: 'Done', icon: 'checkmark-circle' as const, color: Colors.textOnCardSecondary, bg: Colors.borderOnCard };
     default:
       return { label: 'Upcoming', icon: 'ellipse-outline' as const, color: Colors.info, bg: 'rgba(58,164,255,0.12)' };
   }
@@ -96,7 +96,7 @@ function StopRowBase({
                 <View style={styles.metaRow}>
                   {stop.location ? (
                     <>
-                      <Ionicons name="location-outline" size={12} color={Colors.textTertiary} />
+                      <Ionicons name="location-outline" size={12} color={Colors.textOnCardTertiary} />
                       <Text style={styles.metaText} numberOfLines={1}>
                         {stop.location}
                       </Text>
@@ -112,7 +112,7 @@ function StopRowBase({
 
               {stop.planned_date ? (
                 <View style={styles.metaRow}>
-                  <Ionicons name="calendar-outline" size={12} color={Colors.textTertiary} />
+                  <Ionicons name="calendar-outline" size={12} color={Colors.textOnCardTertiary} />
                   <Text style={styles.metaText}>
                     {new Date(stop.planned_date).toLocaleDateString('en-US', {
                       month: 'short',
@@ -181,12 +181,12 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.card,
     borderRadius: Radius.lg,
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.md,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: Colors.border,
+    borderColor: Colors.borderOnCard,
     ...Shadows.sm,
   },
   cardMain: {
@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
   name: {
     ...Typography.bodyMed,
     fontWeight: '700',
-    color: Colors.text,
+    color: Colors.textOnCard,
   },
   metaRow: {
     flexDirection: 'row',
@@ -205,12 +205,12 @@ const styles = StyleSheet.create({
   },
   metaText: {
     ...Typography.caption,
-    color: Colors.textSecondary,
+    color: Colors.textOnCardSecondary,
     flexShrink: 1,
   },
   notesPreview: {
     ...Typography.caption,
-    color: Colors.textTertiary,
+    color: Colors.textOnCardTertiary,
     flexShrink: 1,
     fontStyle: 'italic',
   },
@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
   indexText: {
     fontSize: 10,
     fontWeight: '800',
-    color: Colors.surface,
+    color: '#FFFFFF',
     lineHeight: 12,
   },
 });

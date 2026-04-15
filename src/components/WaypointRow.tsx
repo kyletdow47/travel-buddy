@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
   numberText: {
     fontSize: 13,
     fontWeight: '800',
-    color: Colors.surface,
+    color: '#FFFFFF',
     lineHeight: 16,
   },
   connector: {

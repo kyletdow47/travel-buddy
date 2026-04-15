@@ -43,7 +43,7 @@ function statusBadgeStyles(status: TripStatus) {
     case 'active':
       return { dot: Colors.success, bg: 'rgba(16,185,129,0.12)', label: 'Active' };
     case 'completed':
-      return { dot: Colors.textSecondary, bg: 'rgba(107,114,128,0.12)', label: 'Completed' };
+      return { dot: Colors.textOnCardSecondary, bg: 'rgba(107,114,128,0.12)', label: 'Completed' };
     case 'planning':
     default:
       return { dot: Colors.warning, bg: 'rgba(245,158,11,0.12)', label: 'Planning' };
@@ -132,7 +132,7 @@ function TripCardBase({ trip, stops = [], onPress, onLongPress }: TripCardProps)
           </Text>
 
           <View style={styles.metaRow}>
-            <Ionicons name="calendar-outline" size={12} color={Colors.textSecondary} />
+            <Ionicons name="calendar-outline" size={12} color={Colors.textOnCardSecondary} />
             <Text style={styles.metaText}>
               {formatDateRange(trip.start_date, trip.end_date)}
             </Text>
@@ -173,8 +173,8 @@ function TripCardBase({ trip, stops = [], onPress, onLongPress }: TripCardProps)
                 );
               })}
               {overflowCount > 0 && (
-                <View style={[styles.tag, { backgroundColor: Colors.border }]}>
-                  <Text style={[styles.tagText, { color: Colors.textSecondary }]}>
+                <View style={[styles.tag, { backgroundColor: Colors.borderOnCard }]}>
+                  <Text style={[styles.tagText, { color: Colors.textOnCardSecondary }]}>
                     +{overflowCount}
                   </Text>
                 </View>
@@ -194,13 +194,13 @@ export const TripCard = memo(TripCardBase);
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.card,
     borderRadius: Radius.lg,
     padding: Spacing.md,
     marginHorizontal: Spacing.lg,
     marginBottom: Spacing.md,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Colors.borderOnCard,
     ...Shadows.md,
   },
   row: {
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
   },
   title: {
     ...Typography.h3,
-    color: Colors.text,
+    color: Colors.textOnCard,
     marginRight: 80,
     marginBottom: Spacing.xs,
   },
@@ -225,11 +225,11 @@ const styles = StyleSheet.create({
   },
   metaText: {
     ...Typography.caption,
-    color: Colors.textSecondary,
+    color: Colors.textOnCardSecondary,
   },
   metaDot: {
     ...Typography.caption,
-    color: Colors.textTertiary,
+    color: Colors.textOnCardTertiary,
     marginHorizontal: 2,
   },
   budget: {
@@ -237,13 +237,13 @@ const styles = StyleSheet.create({
   },
   budgetText: {
     ...Typography.micro,
-    color: Colors.textSecondary,
+    color: Colors.textOnCardSecondary,
     marginBottom: Spacing.xs,
   },
   budgetTrack: {
     height: 4,
     borderRadius: Radius.xs,
-    backgroundColor: Colors.border,
+    backgroundColor: Colors.borderOnCard,
     overflow: 'hidden',
   },
   budgetFill: {
@@ -290,7 +290,7 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: Radius.full,
     borderWidth: 1.5,
-    borderColor: Colors.surface,
+    borderColor: Colors.card,
   },
   statusBadge: {
     position: 'absolute',
