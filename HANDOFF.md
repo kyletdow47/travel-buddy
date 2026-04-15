@@ -125,11 +125,13 @@ npx expo start
 # Press `i` to launch iOS simulator
 ```
 
-**Environment:** You will need the `.env` file locally — it's gitignored. Check 1Password / shared vault for:
-- `EXPO_PUBLIC_SUPABASE_URL`
-- `EXPO_PUBLIC_SUPABASE_ANON_KEY`
-- `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY`
-- `EXPO_PUBLIC_ANTHROPIC_API_KEY`
+**Environment:** You need a `.env` file at `apps/travel-buddy/.env` (it's gitignored — never committed). Copy it from the other Mac at that exact path, or use `apps/travel-buddy/.env.example` as a template. Four keys required:
+- `EXPO_PUBLIC_SUPABASE_URL` — Supabase dashboard → Project Settings → API
+- `EXPO_PUBLIC_SUPABASE_ANON_KEY` — same page
+- `EXPO_PUBLIC_ANTHROPIC_API_KEY` — https://console.anthropic.com/settings/keys
+- `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` — Google Cloud Console → APIs & Services → Credentials
+
+Quickest transfer: AirDrop the `.env` file from the other Mac, or `scp` over SSH.
 
 ---
 
