@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, Pressable, Alert, ActivityIndicator } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { FrostedSheet } from './FrostedSheet';
@@ -140,7 +140,7 @@ function ActionRow({
   onPress,
   busy,
 }: {
-  icon: keyof typeof import('@expo/vector-icons/build/Ionicons').glyphMap;
+  icon: React.ComponentProps<typeof Ionicons>['name'];
   label: string;
   tone?: 'default' | 'danger';
   onPress: () => void;
