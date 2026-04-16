@@ -1,8 +1,8 @@
-const anthropicApiKey = process.env.EXPO_PUBLIC_ANTHROPIC_API_KEY;
+const anthropicApiKey = process.env.EXPO_PUBLIC_ANTHROPIC_API_KEY ?? '';
 
-if (!anthropicApiKey) {
-  throw new Error(
-    'Missing EXPO_PUBLIC_ANTHROPIC_API_KEY. Add it to your .env file.'
+if (__DEV__ && !anthropicApiKey) {
+  console.warn(
+    'Missing EXPO_PUBLIC_ANTHROPIC_API_KEY. AI assistant will not work. Add it to your .env file.',
   );
 }
 

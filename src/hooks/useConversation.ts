@@ -4,7 +4,9 @@ import {
   upsertConversation,
   clearConversation as clearConversationApi,
 } from '../services/conversationsService';
+import { sendChatMessage } from '../services/aiService';
 import type { Message } from '../services/conversationsService';
+import type { Trip } from '../types';
 
 export type { Message } from '../services/conversationsService';
 
@@ -35,15 +37,19 @@ function toService(msg: ChatMessage): Message {
   };
 }
 
-export function useConversation(tripId: string | null) {
+export function useConversation(tripId: string | null, trip?: Trip | null) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   // Track tripId to avoid stale writes
   const tripIdRef = useRef(tripId);
   tripIdRef.current = tripId;
+
+  const tripRef = useRef(trip ?? null);
+  tripRef.current = trip ?? null;
 
   // Load conversation on mount / tripId change
   useEffect(() => {
@@ -75,10 +81,10 @@ export function useConversation(tripId: string | null) {
     };
   }, [tripId]);
 
-  // Clean up pending simulated response timer on unmount
+  // Clean up pending request on unmount
   useEffect(() => {
     return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
+      if (abortRef.current) abortRef.current.abort();
     };
   }, []);
 
@@ -96,10 +102,12 @@ export function useConversation(tripId: string | null) {
     [],
   );
 
-  /** Send a user message and get a simulated assistant response. */
+  /** Send a user message and get a real AI response. */
   const sendMessage = useCallback(
-    (text: string) => {
+    async (text: string) => {
       if (!text.trim() || !tripIdRef.current) return;
+
+      setError(null);
 
       const userMsg: ChatMessage = {
         id: `u-${Date.now()}`,
@@ -108,22 +116,36 @@ export function useConversation(tripId: string | null) {
         createdAt: Date.now(),
       };
 
+      let updatedMessages: ChatMessage[] = [];
       setMessages((prev) => {
-        const next = [...prev, userMsg];
-        // Persist after adding user message
-        persist(next);
-        return next;
+        updatedMessages = [...prev, userMsg];
+        persist(updatedMessages);
+        return updatedMessages;
       });
 
       setIsThinking(true);
 
-      // Simulated response — swap with real AI call later
-      timerRef.current = setTimeout(() => {
+      // Abort any previous in-flight request
+      if (abortRef.current) abortRef.current.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
+
+      try {
+        const apiMessages = updatedMessages.map((m) => ({
+          role: m.role,
+          content: m.content,
+        }));
+
+        const responseText = await sendChatMessage(
+          apiMessages,
+          tripRef.current,
+          controller.signal,
+        );
+
         const assistantMsg: ChatMessage = {
           id: `a-${Date.now()}`,
           role: 'assistant',
-          content:
-            'That sounds exciting. Tell me a bit more and I will sketch out an itinerary for you.',
+          content: responseText,
           createdAt: Date.now(),
         };
 
@@ -132,9 +154,29 @@ export function useConversation(tripId: string | null) {
           persist(next);
           return next;
         });
+      } catch (err: unknown) {
+        if (err instanceof Error && err.name === 'AbortError') return;
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to get response';
+        setError(errorMessage);
+
+        // Add error message as assistant response so user sees what went wrong
+        const errorMsg: ChatMessage = {
+          id: `a-err-${Date.now()}`,
+          role: 'assistant',
+          content: `Sorry, I couldn\u2019t process that request. ${errorMessage}`,
+          createdAt: Date.now(),
+        };
+
+        setMessages((prev) => {
+          const next = [...prev, errorMsg];
+          persist(next);
+          return next;
+        });
+      } finally {
         setIsThinking(false);
-        timerRef.current = null;
-      }, 900);
+        abortRef.current = null;
+      }
     },
     [persist],
   );
@@ -144,9 +186,10 @@ export function useConversation(tripId: string | null) {
     const tid = tripIdRef.current;
     setMessages([]);
     setIsThinking(false);
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
+    setError(null);
+    if (abortRef.current) {
+      abortRef.current.abort();
+      abortRef.current = null;
     }
     if (tid) {
       try {
@@ -161,6 +204,7 @@ export function useConversation(tripId: string | null) {
     messages,
     loading,
     isThinking,
+    error,
     sendMessage,
     clearConversation,
   };

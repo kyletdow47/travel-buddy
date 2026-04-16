@@ -54,7 +54,7 @@ export default function AssistantScreen() {
     isThinking,
     sendMessage,
     clearConversation,
-  } = useConversation(resolvedTripId);
+  } = useConversation(resolvedTripId, activeTrip);
 
   const [input, setInput] = useState('');
   const listRef = useRef<FlatList<ChatMessage>>(null);
@@ -78,7 +78,7 @@ export default function AssistantScreen() {
     const text = input.trim();
     if (!text || !resolvedTripId) return;
     haptics.light();
-    sendMessage(text);
+    void sendMessage(text);
     setInput('');
   };
 
@@ -102,7 +102,7 @@ export default function AssistantScreen() {
       return;
     }
     haptics.light();
-    sendMessage(text);
+    void sendMessage(text);
   };
 
   return (
