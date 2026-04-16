@@ -18,7 +18,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { AIOrb } from '../../src/components/AIOrb';
 import { useTrips } from '../../src/hooks/useTrips';
 import { useConversation } from '../../src/hooks/useConversation';
-import type { ChatMessage } from '../../src/hooks/useConversation';
+import type { ChatMessage, TripContext } from '../../src/hooks/useConversation';
 import type { Trip } from '../../src/types';
 import { Colors, Typography, Spacing, Radius, Shadows } from '../../src/constants/theme';
 import { haptics } from '../../src/lib/haptics';
@@ -48,13 +48,24 @@ export default function AssistantScreen() {
     [trips, resolvedTripId],
   );
 
+  const tripContext = useMemo((): TripContext | undefined => {
+    if (!activeTrip) return undefined;
+    return {
+      name: activeTrip.name,
+      startDate: activeTrip.start_date,
+      endDate: activeTrip.end_date,
+      budget: activeTrip.budget,
+      countryFlag: activeTrip.country_flag,
+    };
+  }, [activeTrip]);
+
   const {
     messages,
     loading: convoLoading,
     isThinking,
     sendMessage,
     clearConversation,
-  } = useConversation(resolvedTripId);
+  } = useConversation(resolvedTripId, tripContext);
 
   const [input, setInput] = useState('');
   const listRef = useRef<FlatList<ChatMessage>>(null);

@@ -4,9 +4,12 @@ import {
   upsertConversation,
   clearConversation as clearConversationApi,
 } from '../services/conversationsService';
+import { sendChatMessage } from '../lib/anthropic';
+import type { TripContext } from '../lib/anthropic';
 import type { Message } from '../services/conversationsService';
 
 export type { Message } from '../services/conversationsService';
+export type { TripContext } from '../lib/anthropic';
 
 export interface ChatMessage {
   id: string;
@@ -15,7 +18,6 @@ export interface ChatMessage {
   createdAt: number;
 }
 
-/** Convert service Message (timestamp string) to ChatMessage (numeric id + createdAt). */
 function toChat(msg: Message, index: number): ChatMessage {
   const ts = new Date(msg.timestamp).getTime() || Date.now();
   return {
@@ -26,7 +28,6 @@ function toChat(msg: Message, index: number): ChatMessage {
   };
 }
 
-/** Convert ChatMessage back to service Message for persistence. */
 function toService(msg: ChatMessage): Message {
   return {
     role: msg.role,
@@ -35,20 +36,31 @@ function toService(msg: ChatMessage): Message {
   };
 }
 
-export function useConversation(tripId: string | null) {
+export function useConversation(
+  tripId: string | null,
+  tripContext?: TripContext,
+) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Track tripId to avoid stale writes
   const tripIdRef = useRef(tripId);
   tripIdRef.current = tripId;
 
-  // Load conversation on mount / tripId change
+  const tripContextRef = useRef(tripContext);
+  tripContextRef.current = tripContext;
+
+  const abortRef = useRef<AbortController | null>(null);
+  const messagesRef = useRef<ChatMessage[]>([]);
+
+  const updateMessages = useCallback((msgs: ChatMessage[]) => {
+    messagesRef.current = msgs;
+    setMessages(msgs);
+  }, []);
+
   useEffect(() => {
     if (!tripId) {
-      setMessages([]);
+      updateMessages([]);
       setLoading(false);
       return;
     }
@@ -61,10 +73,9 @@ export function useConversation(tripId: string | null) {
         const convo = await getConversation(tripId);
         if (cancelled) return;
         const raw = (convo?.messages ?? []) as unknown as Message[];
-        setMessages(raw.map(toChat));
+        updateMessages(raw.map(toChat));
       } catch {
-        // If we fail to load, start fresh
-        if (!cancelled) setMessages([]);
+        if (!cancelled) updateMessages([]);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -72,31 +83,29 @@ export function useConversation(tripId: string | null) {
 
     return () => {
       cancelled = true;
+      if (abortRef.current) {
+        abortRef.current.abort();
+        abortRef.current = null;
+      }
     };
-  }, [tripId]);
+  }, [tripId, updateMessages]);
 
-  // Clean up pending simulated response timer on unmount
   useEffect(() => {
     return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
+      if (abortRef.current) abortRef.current.abort();
     };
   }, []);
 
-  /** Persist current messages array to Supabase. */
-  const persist = useCallback(
-    async (msgs: ChatMessage[]) => {
-      const tid = tripIdRef.current;
-      if (!tid) return;
-      try {
-        await upsertConversation(tid, msgs.map(toService));
-      } catch {
-        // Silently fail persistence — messages remain in local state
-      }
-    },
-    [],
-  );
+  const persist = useCallback(async (msgs: ChatMessage[]) => {
+    const tid = tripIdRef.current;
+    if (!tid) return;
+    try {
+      await upsertConversation(tid, msgs.map(toService));
+    } catch {
+      // Silently fail persistence — messages remain in local state
+    }
+  }, []);
 
-  /** Send a user message and get a simulated assistant response. */
   const sendMessage = useCallback(
     (text: string) => {
       if (!text.trim() || !tripIdRef.current) return;
@@ -108,45 +117,64 @@ export function useConversation(tripId: string | null) {
         createdAt: Date.now(),
       };
 
-      setMessages((prev) => {
-        const next = [...prev, userMsg];
-        // Persist after adding user message
-        persist(next);
-        return next;
-      });
-
+      const withUser = [...messagesRef.current, userMsg];
+      updateMessages(withUser);
+      persist(withUser);
       setIsThinking(true);
 
-      // Simulated response — swap with real AI call later
-      timerRef.current = setTimeout(() => {
-        const assistantMsg: ChatMessage = {
-          id: `a-${Date.now()}`,
-          role: 'assistant',
-          content:
-            'That sounds exciting. Tell me a bit more and I will sketch out an itinerary for you.',
-          createdAt: Date.now(),
-        };
+      if (abortRef.current) abortRef.current.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
 
-        setMessages((prev) => {
-          const next = [...prev, assistantMsg];
-          persist(next);
-          return next;
+      const apiMessages = withUser.map((m) => ({
+        role: m.role,
+        content: m.content,
+      }));
+
+      sendChatMessage(apiMessages, tripContextRef.current, controller.signal)
+        .then((responseText) => {
+          if (controller.signal.aborted) return;
+          const assistantMsg: ChatMessage = {
+            id: `a-${Date.now()}`,
+            role: 'assistant',
+            content: responseText,
+            createdAt: Date.now(),
+          };
+          const withAssistant = [...messagesRef.current, assistantMsg];
+          updateMessages(withAssistant);
+          persist(withAssistant);
+        })
+        .catch((err: Error) => {
+          if (err.name === 'AbortError') return;
+          const errorMsg: ChatMessage = {
+            id: `e-${Date.now()}`,
+            role: 'assistant',
+            content: 'Sorry, I had trouble connecting. Please try again.',
+            createdAt: Date.now(),
+          };
+          const withError = [...messagesRef.current, errorMsg];
+          updateMessages(withError);
+          persist(withError);
+        })
+        .finally(() => {
+          if (!controller.signal.aborted) {
+            setIsThinking(false);
+          }
+          if (abortRef.current === controller) {
+            abortRef.current = null;
+          }
         });
-        setIsThinking(false);
-        timerRef.current = null;
-      }, 900);
     },
-    [persist],
+    [persist, updateMessages],
   );
 
-  /** Clear the entire conversation for the current trip. */
   const clearConversation = useCallback(async () => {
     const tid = tripIdRef.current;
-    setMessages([]);
+    updateMessages([]);
     setIsThinking(false);
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
+    if (abortRef.current) {
+      abortRef.current.abort();
+      abortRef.current = null;
     }
     if (tid) {
       try {
@@ -155,7 +183,7 @@ export function useConversation(tripId: string | null) {
         // Best-effort clear
       }
     }
-  }, []);
+  }, [updateMessages]);
 
   return {
     messages,
