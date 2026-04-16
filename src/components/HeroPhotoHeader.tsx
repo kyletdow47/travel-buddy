@@ -143,14 +143,15 @@ export function HeroPhotoHeader({
   );
 
   const Scrim = LinearGradient ? (
-    <LinearGradient
-      pointerEvents="none"
-      colors={scrimColors}
-      start={{ x: 0.5, y: 0 }}
-      end={{ x: 0.5, y: 1 }}
-      locations={[0, 1]}
-      style={StyleSheet.absoluteFill}
-    />
+    <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+      <LinearGradient
+        colors={scrimColors}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+        locations={[0, 1]}
+        style={StyleSheet.absoluteFill}
+      />
+    </View>
   ) : (
     // Fallback: layered solid scrim
     <View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.fallbackScrim]} />
