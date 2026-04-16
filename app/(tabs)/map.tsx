@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -8,9 +8,12 @@ import {
   Animated,
   Platform,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import MapView, { Marker, type Region } from 'react-native-maps';
+import * as Location from 'expo-location';
 import type { Stop } from '../../src/types';
 import { useTrips } from '../../src/hooks/useTrips';
 import { useStops } from '../../src/hooks/useStops';
@@ -19,6 +22,13 @@ import { EditStopModal } from '../../src/components/EditStopModal';
 import { StopDetailSheet } from '../../src/components/StopDetailSheet';
 import { Colors, Typography, Spacing, Radius, Shadows } from '../../src/constants/theme';
 import { haptics } from '../../src/lib/haptics';
+
+const DEFAULT_REGION: Region = {
+  latitude: 40.7128,
+  longitude: -74.006,
+  latitudeDelta: 0.5,
+  longitudeDelta: 0.5,
+};
 
 export default function MapScreen() {
   const { trips, loading: tripsLoading } = useTrips();
@@ -40,20 +50,80 @@ export default function MapScreen() {
 
   const [selectedStop, setSelectedStop] = useState<Stop | null>(null);
   const [editingStop, setEditingStop] = useState<Stop | null>(null);
+  const [locating, setLocating] = useState(false);
 
   const tripStops = useMemo(
     () => stops.filter((s) => s.lat != null && s.lng != null),
     [stops],
   );
 
+  const mapRef = useRef<MapView>(null);
   const fabScale = useMemo(() => new Animated.Value(1), []);
-  const onFabPress = () => {
+
+  const initialRegion = useMemo((): Region => {
+    if (tripStops.length === 0) return DEFAULT_REGION;
+    const lats = tripStops.map((s) => s.lat!);
+    const lngs = tripStops.map((s) => s.lng!);
+    const minLat = Math.min(...lats);
+    const maxLat = Math.max(...lats);
+    const minLng = Math.min(...lngs);
+    const maxLng = Math.max(...lngs);
+    return {
+      latitude: (minLat + maxLat) / 2,
+      longitude: (minLng + maxLng) / 2,
+      latitudeDelta: Math.max((maxLat - minLat) * 1.3, 0.02),
+      longitudeDelta: Math.max((maxLng - minLng) * 1.3, 0.02),
+    };
+  }, [tripStops]);
+
+  useEffect(() => {
+    if (tripStops.length === 0) return;
+    const timer = setTimeout(() => {
+      mapRef.current?.fitToCoordinates(
+        tripStops.map((s) => ({ latitude: s.lat!, longitude: s.lng! })),
+        { edgePadding: { top: 120, right: 60, bottom: 160, left: 60 }, animated: true },
+      );
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [resolvedTripId, tripStops]);
+
+  const onFabPress = useCallback(async () => {
     haptics.light();
     Animated.sequence([
       Animated.timing(fabScale, { toValue: 0.92, duration: 80, useNativeDriver: true }),
       Animated.spring(fabScale, { toValue: 1, useNativeDriver: true, damping: 10 }),
     ]).start();
-  };
+
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert(
+          'Location Required',
+          'Enable location access in Settings to center the map on your position.',
+        );
+        return;
+      }
+
+      setLocating(true);
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+
+      mapRef.current?.animateToRegion(
+        {
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        },
+        600,
+      );
+    } catch {
+      Alert.alert('Location Error', 'Unable to determine your location. Please try again.');
+    } finally {
+      setLocating(false);
+    }
+  }, [fabScale]);
 
   const handleStatusCycle = useCallback(
     async (stop: Stop) => {
@@ -83,24 +153,22 @@ export default function MapScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Map surface placeholder — full-screen MapView rendered here when wired. */}
-      <View style={styles.mapSurface}>
-        <View style={styles.mapPlaceholderCenter}>
-          <Ionicons name="map-outline" size={48} color={Colors.primary} />
-          <Text style={styles.mapPlaceholderText}>
-            {tripStops.length > 0
-              ? `${tripStops.length} stop${tripStops.length !== 1 ? 's' : ''} ready to render`
-              : stops.length > 0
-                ? 'Add coordinates to stops to see them on the map'
-                : 'Map renders here when stops have coordinates'}
-          </Text>
-        </View>
-        {/* Demo cluster of markers stacked visually to showcase design */}
-        {tripStops.slice(0, 3).map((stop, idx) => (
-          <TouchableOpacity
+      <MapView
+        ref={mapRef}
+        style={styles.map}
+        initialRegion={initialRegion}
+        mapType={Platform.OS === 'ios' ? 'mutedStandard' : 'standard'}
+        showsUserLocation
+        showsMyLocationButton={false}
+        showsCompass={false}
+        showsScale={false}
+        rotateEnabled={false}
+        onPress={() => setSelectedStop(null)}
+      >
+        {tripStops.map((stop) => (
+          <Marker
             key={stop.id}
-            style={[styles.markerAnchor, { top: 120 + idx * 60, left: 40 + idx * 72 }]}
-            activeOpacity={0.85}
+            coordinate={{ latitude: stop.lat!, longitude: stop.lng! }}
             onPress={() => {
               haptics.selection();
               setSelectedStop(stop);
@@ -110,9 +178,9 @@ export default function MapScreen() {
               stop={stop}
               isSelected={selectedStop?.id === stop.id}
             />
-          </TouchableOpacity>
+          </Marker>
         ))}
-      </View>
+      </MapView>
 
       {/* Trip context header (frosted chip strip) */}
       <SafeAreaView style={styles.headerOverlay} edges={['top']}>
@@ -174,8 +242,13 @@ export default function MapScreen() {
           activeOpacity={0.85}
           style={styles.fabButton}
           onPress={onFabPress}
+          disabled={locating}
         >
-          <Ionicons name="locate" size={22} color="#FFFFFF" />
+          {locating ? (
+            <ActivityIndicator size="small" color="#FFFFFF" />
+          ) : (
+            <Ionicons name="locate" size={22} color="#FFFFFF" />
+          )}
         </TouchableOpacity>
       </Animated.View>
 
@@ -212,24 +285,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
-  mapSurface: {
+  map: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: Colors.backgroundSecondary,
-  },
-  mapPlaceholderCenter: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: Spacing.sm,
-    paddingHorizontal: Spacing.xl,
-  },
-  mapPlaceholderText: {
-    ...Typography.body,
-    color: Colors.textTertiary,
-    textAlign: 'center',
-  },
-  markerAnchor: {
-    position: 'absolute',
   },
 
   // Trip chip strip overlay
