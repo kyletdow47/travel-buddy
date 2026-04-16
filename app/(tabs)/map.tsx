@@ -8,12 +8,14 @@ import {
   Animated,
   Platform,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import type { Stop } from '../../src/types';
 import { useTrips } from '../../src/hooks/useTrips';
 import { useStops } from '../../src/hooks/useStops';
+import { useLocation } from '../../src/hooks/useLocation';
 import { MapPhotoMarker } from '../../src/components/MapPhotoMarker';
 import { EditStopModal } from '../../src/components/EditStopModal';
 import { StopDetailSheet } from '../../src/components/StopDetailSheet';
@@ -41,19 +43,33 @@ export default function MapScreen() {
   const [selectedStop, setSelectedStop] = useState<Stop | null>(null);
   const [editingStop, setEditingStop] = useState<Stop | null>(null);
 
+  const {
+    coords: userCoords,
+    loading: locating,
+    error: locationError,
+    locate,
+  } = useLocation();
+
   const tripStops = useMemo(
     () => stops.filter((s) => s.lat != null && s.lng != null),
     [stops],
   );
 
   const fabScale = useMemo(() => new Animated.Value(1), []);
-  const onFabPress = () => {
+  const onFabPress = useCallback(async () => {
     haptics.light();
     Animated.sequence([
       Animated.timing(fabScale, { toValue: 0.92, duration: 80, useNativeDriver: true }),
       Animated.spring(fabScale, { toValue: 1, useNativeDriver: true, damping: 10 }),
     ]).start();
-  };
+
+    const coords = await locate();
+    if (coords) {
+      haptics.success();
+    } else {
+      haptics.warning();
+    }
+  }, [fabScale, locate]);
 
   const handleStatusCycle = useCallback(
     async (stop: Stop) => {
@@ -94,6 +110,17 @@ export default function MapScreen() {
                 ? 'Add coordinates to stops to see them on the map'
                 : 'Map renders here when stops have coordinates'}
           </Text>
+          {userCoords && (
+            <View style={styles.userLocationBadge}>
+              <View style={styles.userDot} />
+              <Text style={styles.userLocationText}>
+                {userCoords.latitude.toFixed(4)}, {userCoords.longitude.toFixed(4)}
+              </Text>
+            </View>
+          )}
+          {locationError && (
+            <Text style={styles.locationErrorText}>{locationError}</Text>
+          )}
         </View>
         {/* Demo cluster of markers stacked visually to showcase design */}
         {tripStops.slice(0, 3).map((stop, idx) => (
@@ -172,10 +199,19 @@ export default function MapScreen() {
       >
         <TouchableOpacity
           activeOpacity={0.85}
-          style={styles.fabButton}
+          style={[styles.fabButton, userCoords ? styles.fabButtonLocated : undefined]}
           onPress={onFabPress}
+          disabled={locating}
         >
-          <Ionicons name="locate" size={22} color="#FFFFFF" />
+          {locating ? (
+            <ActivityIndicator size="small" color="#FFFFFF" />
+          ) : (
+            <Ionicons
+              name={userCoords ? 'navigate' : 'locate'}
+              size={22}
+              color="#FFFFFF"
+            />
+          )}
         </TouchableOpacity>
       </Animated.View>
 
@@ -323,5 +359,41 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     ...Shadows.md,
+  },
+  fabButtonLocated: {
+    backgroundColor: Colors.success,
+  },
+
+  // User location
+  userLocationBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    marginTop: Spacing.md,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: Radius.full,
+    backgroundColor: Colors.cardElevated,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  userDot: {
+    width: 10,
+    height: 10,
+    borderRadius: Radius.full,
+    backgroundColor: Colors.info,
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+  },
+  userLocationText: {
+    ...Typography.caption,
+    color: Colors.text,
+    fontVariant: ['tabular-nums'],
+  },
+  locationErrorText: {
+    ...Typography.caption,
+    color: Colors.error,
+    marginTop: Spacing.sm,
+    textAlign: 'center',
   },
 });
