@@ -14,15 +14,19 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import type { PackingItem } from '../../src/types';
 import { useTrips } from '../../src/hooks/useTrips';
 import { usePacking } from '../../src/hooks/usePacking';
+import { useStops } from '../../src/hooks/useStops';
+import { usePackingSuggestions } from '../../src/hooks/usePackingSuggestions';
 import {
   PackingItemRow,
   PackingItemSeparator,
 } from '../../src/components/PackingItemRow';
 import { AddPackingItemModal } from '../../src/components/AddPackingItemModal';
+import { PackingSuggestionsSheet } from '../../src/components/PackingSuggestionsSheet';
 import { AnimatedEnter } from '../../src/components/AnimatedEnter';
 import { Skeleton } from '../../src/components/SkeletonLoader';
 import { Colors, Typography, Spacing, Radius, Shadows } from '../../src/constants/theme';
 import { haptics } from '../../src/lib/haptics';
+import type { PackingSuggestion } from '../../src/services/packingSuggestionService';
 
 const CATEGORY_ORDER = [
   'Clothing',
@@ -78,9 +82,54 @@ export default function PackingScreen() {
     toggle,
   } = usePacking(resolvedTripId);
 
+  const { stops } = useStops(resolvedTripId);
+
+  const {
+    suggestions,
+    loading: suggestionsLoading,
+    error: suggestionsError,
+    fetchSuggestions,
+    clear: clearSuggestions,
+  } = usePackingSuggestions();
+
   const [addModalOpen, setAddModalOpen] = useState(false);
+  const [suggestionsOpen, setSuggestionsOpen] = useState(false);
 
   const loading = tripsLoading || itemsLoading;
+
+  const activeTrip = useMemo(
+    () => trips.find((t) => t.id === resolvedTripId) ?? null,
+    [trips, resolvedTripId],
+  );
+
+  const handleAiSuggest = useCallback(() => {
+    if (!activeTrip) return;
+    haptics.medium();
+    setSuggestionsOpen(true);
+    fetchSuggestions(activeTrip, stops, items);
+  }, [activeTrip, stops, items, fetchSuggestions]);
+
+  const handleAddSuggestions = useCallback(
+    async (selected: PackingSuggestion[]) => {
+      if (!resolvedTripId) return;
+      for (const item of selected) {
+        await addItem({
+          trip_id: resolvedTripId,
+          name: item.name,
+          category: item.category,
+          packed: false,
+          assigned_to: null,
+        });
+      }
+      haptics.success();
+    },
+    [resolvedTripId, addItem],
+  );
+
+  const handleCloseSuggestions = useCallback(() => {
+    setSuggestionsOpen(false);
+    clearSuggestions();
+  }, [clearSuggestions]);
 
   const packedCount = useMemo(
     () => items.filter((i) => i.packed).length,
@@ -181,7 +230,18 @@ export default function PackingScreen() {
         }
       />
 
-      {/* FAB */}
+      {/* AI Suggest FAB */}
+      {resolvedTripId && (
+        <TouchableOpacity
+          style={styles.aiFab}
+          activeOpacity={0.85}
+          onPress={handleAiSuggest}
+        >
+          <Ionicons name="sparkles" size={22} color="#FFFFFF" />
+        </TouchableOpacity>
+      )}
+
+      {/* Add FAB */}
       <TouchableOpacity
         style={styles.fab}
         activeOpacity={0.85}
@@ -202,6 +262,16 @@ export default function PackingScreen() {
           onAdd={addItem}
         />
       )}
+
+      {/* AI Suggestions Sheet */}
+      <PackingSuggestionsSheet
+        visible={suggestionsOpen}
+        onClose={handleCloseSuggestions}
+        suggestions={suggestions}
+        loading={suggestionsLoading}
+        error={suggestionsError}
+        onAddSelected={handleAddSuggestions}
+      />
     </SafeAreaView>
   );
 }
@@ -580,6 +650,20 @@ const styles = StyleSheet.create({
     ...Typography.body,
     color: Colors.textSecondary,
     textAlign: 'center',
+  },
+
+  // AI Suggest FAB
+  aiFab: {
+    position: 'absolute',
+    bottom: 168,
+    right: 28,
+    width: 44,
+    height: 44,
+    borderRadius: Radius.full,
+    backgroundColor: '#F5B63B',
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...Shadows.md,
   },
 
   // FAB — primary action
