@@ -4,6 +4,8 @@ import {
   upsertConversation,
   clearConversation as clearConversationApi,
 } from '../services/conversationsService';
+import { sendChatMessage } from '../services/anthropicService';
+import { useTrips } from './useTrips';
 import type { Message } from '../services/conversationsService';
 
 export type { Message } from '../services/conversationsService';
@@ -39,7 +41,8 @@ export function useConversation(tripId: string | null) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  const { trips } = useTrips();
 
   // Track tripId to avoid stale writes
   const tripIdRef = useRef(tripId);
@@ -75,10 +78,10 @@ export function useConversation(tripId: string | null) {
     };
   }, [tripId]);
 
-  // Clean up pending simulated response timer on unmount
+  // Abort pending API call on unmount
   useEffect(() => {
     return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
+      abortRef.current?.abort();
     };
   }, []);
 
@@ -96,7 +99,7 @@ export function useConversation(tripId: string | null) {
     [],
   );
 
-  /** Send a user message and get a simulated assistant response. */
+  /** Send a user message and get a real AI response via the Anthropic API. */
   const sendMessage = useCallback(
     (text: string) => {
       if (!text.trim() || !tripIdRef.current) return;
@@ -108,35 +111,81 @@ export function useConversation(tripId: string | null) {
         createdAt: Date.now(),
       };
 
+      // Abort any in-flight request
+      abortRef.current?.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
+
       setMessages((prev) => {
         const next = [...prev, userMsg];
-        // Persist after adding user message
         persist(next);
+
+        // Build trip context for the system prompt
+        const trip = trips.find((t) => t.id === tripIdRef.current) ?? null;
+        const tripContext = trip
+          ? {
+              name: trip.name,
+              startDate: trip.start_date,
+              endDate: trip.end_date,
+              budget: trip.budget,
+              spent: trip.spent,
+              countryCode: trip.country_code,
+            }
+          : null;
+
+        // Build message history for the API (only role + content)
+        const apiMessages = next.map((m) => ({
+          role: m.role,
+          content: m.content,
+        }));
+
+        setIsThinking(true);
+
+        sendChatMessage(apiMessages, tripContext, controller.signal)
+          .then((responseText) => {
+            if (controller.signal.aborted) return;
+
+            const assistantMsg: ChatMessage = {
+              id: `a-${Date.now()}`,
+              role: 'assistant',
+              content: responseText,
+              createdAt: Date.now(),
+            };
+
+            setMessages((prev2) => {
+              const updated = [...prev2, assistantMsg];
+              persist(updated);
+              return updated;
+            });
+          })
+          .catch((err: Error) => {
+            if (controller.signal.aborted) return;
+
+            const errorMsg: ChatMessage = {
+              id: `a-${Date.now()}`,
+              role: 'assistant',
+              content: err.message.includes('API key')
+                ? 'I need an API key to respond. Please add EXPO_PUBLIC_ANTHROPIC_API_KEY to your .env file.'
+                : 'Sorry, I had trouble connecting. Please try again in a moment.',
+              createdAt: Date.now(),
+            };
+
+            setMessages((prev2) => {
+              const updated = [...prev2, errorMsg];
+              persist(updated);
+              return updated;
+            });
+          })
+          .finally(() => {
+            if (!controller.signal.aborted) {
+              setIsThinking(false);
+            }
+          });
+
         return next;
       });
-
-      setIsThinking(true);
-
-      // Simulated response — swap with real AI call later
-      timerRef.current = setTimeout(() => {
-        const assistantMsg: ChatMessage = {
-          id: `a-${Date.now()}`,
-          role: 'assistant',
-          content:
-            'That sounds exciting. Tell me a bit more and I will sketch out an itinerary for you.',
-          createdAt: Date.now(),
-        };
-
-        setMessages((prev) => {
-          const next = [...prev, assistantMsg];
-          persist(next);
-          return next;
-        });
-        setIsThinking(false);
-        timerRef.current = null;
-      }, 900);
     },
-    [persist],
+    [persist, trips],
   );
 
   /** Clear the entire conversation for the current trip. */
@@ -144,10 +193,8 @@ export function useConversation(tripId: string | null) {
     const tid = tripIdRef.current;
     setMessages([]);
     setIsThinking(false);
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
-    }
+    abortRef.current?.abort();
+    abortRef.current = null;
     if (tid) {
       try {
         await clearConversationApi(tid);

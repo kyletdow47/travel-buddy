@@ -1,9 +1,5 @@
-const anthropicApiKey = process.env.EXPO_PUBLIC_ANTHROPIC_API_KEY;
+export const ANTHROPIC_API_KEY = process.env.EXPO_PUBLIC_ANTHROPIC_API_KEY ?? '';
 
-if (!anthropicApiKey) {
-  throw new Error(
-    'Missing EXPO_PUBLIC_ANTHROPIC_API_KEY. Add it to your .env file.'
-  );
+export function isAnthropicConfigured(): boolean {
+  return ANTHROPIC_API_KEY.length > 0;
 }
-
-export const ANTHROPIC_API_KEY = anthropicApiKey;
